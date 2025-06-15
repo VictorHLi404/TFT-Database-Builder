@@ -13,5 +13,7 @@ Once user secrets have been set, run the project in VS Code Run and Debug, or in
 
 A database MUST be first initialized by another means. This tool is meant to connect to an existing database created via PgAdmin or some other tool.
 
-The tool works by combining the /tft/match/v1/matches/by-puuid/{puuid}/ids endpoint that provides match IDs with /tft/match/v1/matches/{matchId} that provides actual match data, including the PUUIDs of players. A BFS queue is then created of all of the match ids and processed accordingly.
+The tool works by combining the /tft/match/v1/matches/by-puuid/{puuid}/ids endpoint that provides match IDs with /tft/match/v1/matches/{matchId} that provides actual match data, including the PUUIDs of players. A BFS queue is then created of all of the match ids and processed accordingly. 
+
+A Thread.Sleep() is hardcoded to prevent rate limiting from Riot Games servers. This can be adjusted manually depending on the level of API token you possess.
 
