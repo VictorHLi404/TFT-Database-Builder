@@ -1,0 +1,14 @@
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\bin\Debug\net9.0\Builder.Data.deps.json
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\bin\Debug\net9.0\Builder.Data.runtimeconfig.json
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\bin\Debug\net9.0\Builder.Data.dll
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\bin\Debug\net9.0\Builder.Data.pdb
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.csproj.AssemblyReference.cache
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.AssemblyInfoInputs.cache
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.AssemblyInfo.cs
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.csproj.CoreCompileInputs.cache
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.dll
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\refint\Builder.Data.dll
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.pdb
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.genruntimeconfig.cache
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\ref\Builder.Data.dll

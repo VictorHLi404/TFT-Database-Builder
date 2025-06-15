@@ -1,0 +1,65 @@
+namespace Builder.Data.Enums;
+
+public enum ChampionEnum
+{
+    Sylas,
+    Seraphine,
+    KogMaw, // Note: Removed apostrophe for valid C# identifier
+    Poppy,
+    Vi,
+    Morgana,
+    Jax,
+    Alistar,
+    Nidalee,
+    Kindred,
+    Zyra,
+    DrMundo, // Note: Removed period for valid C# identifier
+    Shaco,
+    Vayne,
+    Illaoi,
+    Skarner,
+    Veigar,
+    LeBlanc,
+    Rhaast,
+    Naafiri,
+    Jhin,
+    Graves,
+    Shyvana,
+    Ekko,
+    TwistedFate, // Note: Removed space for valid C# identifier
+    Darius,
+    Yuumi,
+    Fiddlesticks,
+    Galio,
+    Draven,
+    Senna,
+    Gragas,
+    Varus,
+    Mordekaiser,
+    JarvanIV, // Note: Removed space for valid C# identifier
+    Elise,
+    Rengar,
+    Jinx,
+    Braum,
+    Xayah,
+    Leona,
+    ChoGath, // Note: Removed apostrophe for valid C# identifier
+    Ziggs,
+    Zed,
+    Vex,
+    Zeri,
+    Sejuani,
+    Aphelios,
+    Annie,
+    Neeko,
+    Brand,
+    MissFortune, // Note: Removed space for valid C# identifier
+    Aurora,
+    Urgot,
+    Kobuko,
+    Renekton,
+    Garen,
+    Viego,
+    Samira,
+    Zac
+}
