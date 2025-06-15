@@ -18,5 +18,5 @@ public class TeamCompEntity
 
     public List<TeamCompChampionJoinEntity> Team { get; set; } = new List<TeamCompChampionJoinEntity>();
 
-    public List<Guid> ChampionIds { get; set; } = new List<Guid>();
+    public List<string>? ChampionHashes { get; set; } = new List<string>();
 }

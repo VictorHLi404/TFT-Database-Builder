@@ -12,3 +12,4 @@ C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\ne
 C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.pdb
 C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.genruntimeconfig.cache
 C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\ref\Builder.Data.dll
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Data\obj\Debug\net9.0\Builder.Data.sourcelink.json

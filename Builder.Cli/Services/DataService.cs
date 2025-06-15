@@ -86,24 +86,40 @@ public class DataService
 
     public async Task AddTeamComp(Participant teamCompDtos)
     {
-        // string hash = CalculateTeamCompHash(teamCompDtos);
-        // TeamCompEntity? teamCompEntity = await TeamCompBaseQuery().Where(t => t.ContentHash == hash).FirstOrDefaultAsync();
-        // if (teamCompEntity != null)
-        // {
-
-        // }
-        // else
-        // {
-        //     Console.WriteLine($"NEW TEAM COMP {hash}");
-        //     var newTeamCompEntity = new TeamCompEntity
-        //     {
-        //         TeamCompId = Guid.NewGuid(),
-        //         ContentHash = hash
-        //     }
-
-        // }
-        // await dbContext.SaveChangesAsync();
-        // return;
+        string hash = CalculateTeamCompHash(teamCompDtos);
+        TeamCompEntity? teamCompEntity = await TeamCompBaseQuery().Where(t => t.ContentHash == hash).FirstOrDefaultAsync();
+        if (teamCompEntity != null)
+        {
+            Console.WriteLine($"HAVE ALREADY SEEN TEAM COMP {hash}");
+            decimal formerAveragePlacement = teamCompEntity.AveragePlacement;
+            decimal newAveragePlacement = ((formerAveragePlacement * teamCompEntity.TotalInstances) + teamCompDtos.placement) / (teamCompEntity.TotalInstances + 1);
+            teamCompEntity.AveragePlacement = newAveragePlacement;
+            teamCompEntity.TotalInstances = teamCompEntity.TotalInstances + 1;
+        }
+        else
+        {
+            Console.WriteLine($"NEW TEAM COMP {hash}");
+            List<string> championHashes = new List<string>();
+            foreach (Unit unit in teamCompDtos.units)
+            {
+                string cleanedChampionName = CleanChampionName(unit.character_id);
+                if (cleanedChampionName == null)
+                {
+                    continue;
+                }
+                championHashes.Add(CalculateWeakChampionHash(cleanedChampionName, unit));
+            }
+            var newTeamCompEntity = new TeamCompEntity
+            {
+                TeamCompId = Guid.NewGuid(),
+                ContentHash = hash,
+                AveragePlacement = teamCompDtos.placement,
+                TotalInstances = 1,
+                ChampionHashes = championHashes,
+            };
+            await dbContext.TeamComps.AddAsync(newTeamCompEntity);
+        }
+        await dbContext.SaveChangesAsync();
         return;
     }
 
@@ -150,16 +166,32 @@ public class DataService
         }
     }
 
+    public string CalculateWeakChampionHash(string cleanedChampionName, Unit championDtos)
+    {
+        string contentToHash = $"{cleanedChampionName}-{championDtos.tier}";
+        using (SHA256 sha256Hash = SHA256.Create())
+        {
+            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
+            // Convert the byte array to a hexadecimal string
+            return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+        } 
+    }
+
     public string CalculateTeamCompHash(Participant participantDtos)
     {
         string contentToHash = "";
-        List<Unit> sortedChampions = participantDtos.units.OrderBy(t => t.character_id).ToList();
+        List<Unit> sortedChampions = participantDtos.units.OrderBy(t => t.character_id)
+            .ThenBy(t =>
+            {
+            var sortedItemNames = t.itemNames.OrderBy(item => item).ToList();
+            return string.Join("-", sortedItemNames).Replace(" ", "").Replace("'", "");
+            })
+            .ToList();
         foreach (Unit unit in sortedChampions)
         {
-            string cleanedChampionName = CleanChampionName(unit.character_id) ?? throw new Exception("Could not clean the champion name correctly.");
-            string items = GetItemString(unit.itemNames);
-            string championToHash = $"{cleanedChampionName}-{items}-{unit.tier}-";
-            contentToHash += championToHash;
+            string cleanedChampionName = CleanChampionName(unit.character_id);
+            if (cleanedChampionName == null) continue;
+            contentToHash += CalculateWeakChampionHash(cleanedChampionName, unit);
         }
         using (SHA256 sha256Hash = SHA256.Create())
         {

@@ -5,14 +5,14 @@
 namespace Builder.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddChampionIdsGINIndex : Migration
+    public partial class AddGINIndex : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(
-                @"CREATE INDEX CONCURRENTLY IF NOT EXISTS ""IX_TeamComps_ChampionIds""
-                ON ""TeamComps"" USING GIN (""ChampionIds"")",
+                @"CREATE INDEX CONCURRENTLY IF NOT EXISTS ""IX_TeamComps_ChampionHashes""
+                ON ""TeamComps"" USING GIN (""ChampionHashes"")",
                 suppressTransaction: true);
         }
 
@@ -20,7 +20,7 @@ namespace Builder.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(
-                @"DROP INDEX CONCURRENTLY IF EXISTS ""IX_TeamComps_ChampionIds""",
+                @"DROP INDEX CONCURRENTLY IF EXISTS ""IX_TeamComps_ChampionHashes""",
                 suppressTransaction: true);
         }
     }

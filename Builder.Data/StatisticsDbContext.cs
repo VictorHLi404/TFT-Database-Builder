@@ -26,7 +26,7 @@ public class StatisticsDbContext : DbContext
     {
         entity.HasIndex(t => t.ContentHash)
             .IsUnique();
-        entity.Property(t => t.ChampionIds)
+        entity.Property(t => t.ChampionHashes)
         .HasColumnType("jsonb");
     }
 

@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Builder.Data.Migrations
 {
     [DbContext(typeof(StatisticsDbContext))]
-    [Migration("20250615183356_AddChampionIds")]
-    partial class AddChampionIds
+    [Migration("20250615195000_AddChampionHashesToTeamComp")]
+    partial class AddChampionHashesToTeamComp
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,8 +86,7 @@ namespace Builder.Data.Migrations
                     b.Property<decimal>("AveragePlacement")
                         .HasColumnType("numeric");
 
-                    b.PrimitiveCollection<List<Guid>>("ChampionIds")
-                        .IsRequired()
+                    b.PrimitiveCollection<List<string>>("ChampionHashes")
                         .HasColumnType("jsonb");
 
                     b.Property<string>("ContentHash")

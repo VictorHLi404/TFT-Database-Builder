@@ -83,8 +83,7 @@ namespace Builder.Data.Migrations
                     b.Property<decimal>("AveragePlacement")
                         .HasColumnType("numeric");
 
-                    b.PrimitiveCollection<List<Guid>>("ChampionIds")
-                        .IsRequired()
+                    b.PrimitiveCollection<List<string>>("ChampionHashes")
                         .HasColumnType("jsonb");
 
                     b.Property<string>("ContentHash")

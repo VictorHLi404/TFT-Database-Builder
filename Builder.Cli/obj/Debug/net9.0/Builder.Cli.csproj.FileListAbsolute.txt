@@ -137,3 +137,4 @@ C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.cli\obj\Debug\net
 C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.cli\obj\Debug\net9.0\Builder.Cli.pdb
 C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.cli\obj\Debug\net9.0\Builder.Cli.genruntimeconfig.cache
 C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.cli\obj\Debug\net9.0\ref\Builder.Cli.dll
+C:\Users\pawof\OneDrive\Documents\TFT Database Builder\Builder.Cli\obj\Debug\net9.0\Builder.Cli.sourcelink.json

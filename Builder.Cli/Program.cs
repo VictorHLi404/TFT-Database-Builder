@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Builder.Cli.Services;
 using System.Runtime.CompilerServices;
 using Builder.Cli.Dtos;
+using Npgsql;
 
 namespace Builder.Cli
 {
@@ -15,22 +16,18 @@ namespace Builder.Cli
     {
         public static async Task Main(string[] args)
         {
-            // 1. Build the Host: This sets up your application's configuration and services.
-            var host = CreateHostBuilder(args).Build();
 
-            // 2. Create a Service Scope: DbContexts (and other scoped services) need a scope
-            //    to exist within. For console apps, you explicitly create one.
+            var host = CreateHostBuilder(args).Build();
+            NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
+
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 try
                 {
-                    // 3. Get your DbContext instance from the service provider.
+
                     var dbContext = services.GetRequiredService<StatisticsDbContext>();
 
-                    // Optional: Apply pending database migrations on application startup.
-                    // This is common in development/testing environments but can be separated
-                    // in production for more control.
                     Console.WriteLine("Applying database migrations...");
                     await dbContext.Database.MigrateAsync();
                     Console.WriteLine("Database migrations applied successfully!");
@@ -40,27 +37,23 @@ namespace Builder.Cli
                     var apiKey = configuration["ApiKeys:RiotApiKey"];
                     Console.WriteLine($"Riot API Key (from configuration): {apiKey}"); // Moved here!
 
-                    // 4. Run your main application logic.
+
 
                     var dataService = services.GetRequiredService<DataService>();
                     var matchIDRequestService = services.GetRequiredService<MatchIDRequestService>();
                     var matchDataRequestService = services.GetRequiredService<MatchDataRequestService>();
 
-                    //    You can get other registered services here (e.g., your TeamCompService).
-                    // var teamCompService = services.GetRequiredService<TeamCompService>();
-                    // await RunApplicationLogic(teamCompService, dbContext);
                     await BuildDatabase(dataService, configuration, matchDataRequestService, matchIDRequestService);
                     Console.WriteLine("Console application finished.");
                 }
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine($"An error occurred during application execution: {ex.Message}");
-                    Console.Error.WriteLine(ex.StackTrace); // Print stack trace for debugging
+                    Console.Error.WriteLine(ex.StackTrace); 
                 }
             }
         }
 
-        // --- Host Configuration Method ---
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, configuration) =>
@@ -93,7 +86,6 @@ namespace Builder.Cli
                     services.AddHttpClient<MatchIDRequestService>();
                     services.AddScoped<DataService>();
 
-                    // Add any other services your console app needs.
                 });
 
         private static async Task BuildDatabase(
@@ -118,14 +110,17 @@ namespace Builder.Cli
             {
                 string currentMatchId = matchBFSQueue.Dequeue();
                 Match currentMatch = await matchDataRequestService.GetMatchData(currentMatchId) ?? throw new Exception($"Could not get match data for match Id {currentMatchId}");
-                foreach (Participant participant in currentMatch.info.participants)
+                
+                List<Participant> participants = currentMatch.info.participants;
+                foreach (Participant participant in participants)
                 {
+                    List<Guid> unitIds = new List<Guid>();
                     foreach (Unit unit in participant.units)
                     {
                         await dataService.AddChampionEntity(unit, participant.placement);
                     }
+                    await dataService.AddTeamComp(participant);
                 }
-                List<Participant> participants = currentMatch.info.participants;
                 List<string> newPUUIDs = new List<string>();
                 foreach (Participant participant in participants)
                 {
@@ -157,8 +152,11 @@ namespace Builder.Cli
             {
                 if (!visitedMatchIds.Contains(matchId))
                 {
+                    if (matchBFSQueue.Count < 200)
+                    {
                     matchBFSQueue.Enqueue(matchId);
                     visitedMatchIds.Add(matchId);
+                    }
                 }
             }
         }

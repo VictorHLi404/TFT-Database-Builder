@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -7,23 +6,23 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Builder.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddChampionIds : Migration
+    public partial class AddChampionHashesToTeamComp : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<List<Guid>>(
-                name: "ChampionIds",
+            migrationBuilder.AddColumn<List<string>>(
+                name: "ChampionHashes",
                 table: "TeamComps",
                 type: "jsonb",
-                nullable: false);
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ChampionIds",
+                name: "ChampionHashes",
                 table: "TeamComps");
         }
     }
