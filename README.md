@@ -1,3 +1,4 @@
+![image](https://github.com/user-attachments/assets/cf8f338d-9a53-440a-8c7c-d31333938615)
 This is an open-source tool used for generating TFT statistics databases in PostgreSQL using Entity Framework Core and ASP.NET 9.0. Currently, it is being used to generate statictics for Four-Two, a publically available TFT practice tool which calls on a private instance of a database generated using this tool via AWS Lambda.
 
 Currently, the tool primarily focuses on generating winrate placements for teams and individual champions dependent on items and tier. It supports fuzzy matching of teams (e.g one champion replaced and/or removed/added), which allows for richer insights to be made by GIN indexing.
