@@ -101,9 +101,7 @@ namespace Builder.Cli
             }
             HashSet<string> visitedMatchIds = new HashSet<string>();
             Queue<string> matchBFSQueue = new Queue<string>();
-
-            List<string> initialMatches = await matchIDRequestService.getMatchIDs(initialPUUID);
-            addMatchesToQueue(initialMatches, matchBFSQueue, visitedMatchIds);
+            await addMatchesToQueue(initialPUUID, matchIDRequestService, matchBFSQueue, visitedMatchIds);
             int gamesChecked = 0;
             int maxSize = 20000;
             while (gamesChecked < maxSize)
@@ -113,15 +111,6 @@ namespace Builder.Cli
                 await dataService.AddMatch(currentMatch);
 
                 List<Participant> participants = currentMatch.info.participants;
-                // foreach (Participant participant in participants)
-                // {
-                //     List<Guid> unitIds = new List<Guid>();
-                //     foreach (Unit unit in participant.units)
-                //     {
-                //         await dataService.AddChampionEntity(unit, participant.placement);
-                //     }
-                //     await dataService.AddTeamComp(participant);
-                // }
                 List<string> newPUUIDs = new List<string>();
                 foreach (Participant participant in participants)
                 {
@@ -132,34 +121,33 @@ namespace Builder.Cli
                 }
                 foreach (string puuid in newPUUIDs)
                 {
-                    Console.Write($"{puuid} ");
-                }
-                foreach (string puuid in newPUUIDs)
-                {
-                    List<string> newMatches = await matchIDRequestService.getMatchIDs(puuid);
-                    addMatchesToQueue(newMatches, matchBFSQueue, visitedMatchIds);
+                    await addMatchesToQueue(puuid, matchIDRequestService, matchBFSQueue, visitedMatchIds);
                 }
                 Thread.Sleep(2000);
                 gamesChecked++;
             }
         }
 
-        private static void addMatchesToQueue(
-            List<string> newMatchIds,
+        private async static Task addMatchesToQueue(
+            string newPUUID,
+            MatchIDRequestService matchIDRequestService,
             Queue<string> matchBFSQueue,
             HashSet<string> visitedMatchIds)
         {
+            if (matchBFSQueue.Count > 100)
+            {
+                return;
+            }
+            List<string> newMatchIds = await matchIDRequestService.getMatchIDs(newPUUID);
             foreach (string matchId in newMatchIds)
             {
                 if (!visitedMatchIds.Contains(matchId))
                 {
-                    if (matchBFSQueue.Count < 200)
-                    {
                     matchBFSQueue.Enqueue(matchId);
                     visitedMatchIds.Add(matchId);
-                    }
                 }
             }
+            return;
         }
     }
 }
