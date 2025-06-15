@@ -26,19 +26,16 @@ public class MatchDataRequestService
     public async Task<Match?> GetMatchData(string matchId)
     {
         string adjustedPath = requestPath.Replace("{matchId}", matchId);
-        Console.WriteLine(adjustedPath);
         try
         {
             var results = await _httpClient.GetFromJsonAsync<Match>(adjustedPath);
 
             if (results == null)
                 throw new Exception($"Failed to successfully get match data from matchId {matchId}");
-            Console.WriteLine(results);
             return results;
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"API Request failed: {ex.Message}");
             return null;
         }
     }

@@ -103,7 +103,7 @@ namespace Builder.Cli
             Queue<string> matchBFSQueue = new Queue<string>();
             await addMatchesToQueue(initialPUUID, matchIDRequestService, matchBFSQueue, visitedMatchIds);
             int gamesChecked = 0;
-            int maxSize = 20000;
+            int maxSize = 5;
             while (gamesChecked < maxSize)
             {
                 string currentMatchId = matchBFSQueue.Dequeue();

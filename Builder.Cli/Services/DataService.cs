@@ -37,7 +37,7 @@ public class DataService
         return Task.CompletedTask;
     }
 
-    public async Task<Guid?> AddChampionEntity(Unit championDtos, int newPlacement)
+    public async Task<ChampionEntity?> AddChampionEntity(Unit championDtos, int newPlacement)
     {
         string cleanedChampionName = CleanChampionName(championDtos.character_id);
         if (cleanedChampionName == null)
@@ -65,6 +65,7 @@ public class DataService
             championEntity.AveragePlacement = newAveragePlacement;
             championEntity.TotalInstances = championEntity.TotalInstances + 1;
             championGuid = championEntity.ChampionEntityId;
+            return championEntity;
         }
         else
         {
@@ -81,12 +82,11 @@ public class DataService
                 ContentHash = hashed
             };
             await dbContext.ChampionEntities.AddAsync(newChampionEntity);
+            return newChampionEntity;
         }
-        // await dbContext.SaveChangesAsync();
-        return championGuid;
     }
 
-    public async Task<Guid> AddTeamComp(Participant teamCompDtos)
+    public async Task<TeamCompEntity> AddTeamComp(Participant teamCompDtos)
     {
         string hash = CalculateTeamCompHash(teamCompDtos);
 
@@ -101,6 +101,7 @@ public class DataService
             teamCompEntity.AveragePlacement = newAveragePlacement;
             teamCompEntity.TotalInstances = teamCompEntity.TotalInstances + 1;
             teamCompGuid = teamCompEntity.TeamCompId;
+            return teamCompEntity;
         }
         else
         {
@@ -125,25 +126,42 @@ public class DataService
                 ChampionHashes = championHashes,
             };
             await dbContext.TeamComps.AddAsync(newTeamCompEntity);
+            return newTeamCompEntity;
         }
-        // await dbContext.SaveChangesAsync();
-        return teamCompGuid;
     }
 
     public async Task AddMatch(Match match)
     {
         foreach (Participant participant in match.info.participants)
         {
-            List<Guid> unitIds = new List<Guid>();
+            List<ChampionEntity> champions = new List<ChampionEntity>();
             foreach (Unit unit in participant.units)
             {
-                Guid? championGuid = await AddChampionEntity(unit, participant.placement);
-                if (championGuid != null)
+                ChampionEntity? championEntity = await AddChampionEntity(unit, participant.placement);
+                if (championEntity != null)
                 {
-                    unitIds.Add(championGuid.Value);
+                    champions.Add(championEntity);
                 }
             }
-            Guid teamCompGuid = await AddTeamComp(participant);
+            TeamCompEntity teamCompEntity = await AddTeamComp(participant);
+            foreach (ChampionEntity champion in champions)
+            {
+                TeamCompChampionJoinEntity? join = await TeamCompChampionJoinBaseQuery()
+                                                    .Where(t => t.TeamCompId == teamCompEntity.TeamCompId
+                                                            && t.ChampionEntityId == champion.ChampionEntityId)
+                                                    .FirstOrDefaultAsync();
+                if (join == null)
+                {
+                    TeamCompChampionJoinEntity newJoin = new TeamCompChampionJoinEntity
+                    {
+                        TeamCompId = teamCompEntity.TeamCompId,
+                        ChampionEntityId = champion.ChampionEntityId,
+                        TeamComp = teamCompEntity,
+                        Champion = champion,
+                    };
+                    await dbContext.TeamCompChampions.AddAsync(newJoin);
+                }
+            } 
         }
         await dbContext.SaveChangesAsync();
         return;
@@ -179,7 +197,6 @@ public class DataService
         using (SHA256 sha256Hash = SHA256.Create())
         {
             byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-            // Convert the byte array to a hexadecimal string
             return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
         }
     }
@@ -190,7 +207,6 @@ public class DataService
         using (SHA256 sha256Hash = SHA256.Create())
         {
             byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-            // Convert the byte array to a hexadecimal string
             return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
         } 
     }
@@ -214,7 +230,6 @@ public class DataService
         using (SHA256 sha256Hash = SHA256.Create())
         {
             byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-            // Convert the byte array to a hexadecimal string
             return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
         }
     }
