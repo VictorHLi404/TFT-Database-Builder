@@ -110,17 +110,18 @@ namespace Builder.Cli
             {
                 string currentMatchId = matchBFSQueue.Dequeue();
                 Match currentMatch = await matchDataRequestService.GetMatchData(currentMatchId) ?? throw new Exception($"Could not get match data for match Id {currentMatchId}");
-                
+                await dataService.AddMatch(currentMatch);
+
                 List<Participant> participants = currentMatch.info.participants;
-                foreach (Participant participant in participants)
-                {
-                    List<Guid> unitIds = new List<Guid>();
-                    foreach (Unit unit in participant.units)
-                    {
-                        await dataService.AddChampionEntity(unit, participant.placement);
-                    }
-                    await dataService.AddTeamComp(participant);
-                }
+                // foreach (Participant participant in participants)
+                // {
+                //     List<Guid> unitIds = new List<Guid>();
+                //     foreach (Unit unit in participant.units)
+                //     {
+                //         await dataService.AddChampionEntity(unit, participant.placement);
+                //     }
+                //     await dataService.AddTeamComp(participant);
+                // }
                 List<string> newPUUIDs = new List<string>();
                 foreach (Participant participant in participants)
                 {

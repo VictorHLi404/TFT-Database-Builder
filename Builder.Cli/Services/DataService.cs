@@ -53,8 +53,10 @@ public class DataService
         Console.WriteLine($"THIS IS THE CHAMPION: {champion}");
         string hashed = CalculateChampionHash(cleanedChampionName, itemNames, championDtos);
 
-        ChampionEntity? championEntity = await ChampionBaseQuery().Where(t => t.ContentHash == hashed).FirstOrDefaultAsync();
+        ChampionEntity? championEntity = await ChampionBaseQuery().Where(t => t.ContentHash == hashed).FirstOrDefaultAsync()
+                                        ?? dbContext.ChampionEntities.Local.FirstOrDefault(t => t.ContentHash == hashed);
         Guid championGuid;
+
         if (championEntity != null)
         {
             Console.WriteLine($"HAVE ALREADY SEEN {cleanedChampionName}, {itemNames}, {championDtos.tier}");
@@ -80,14 +82,17 @@ public class DataService
             };
             await dbContext.ChampionEntities.AddAsync(newChampionEntity);
         }
-        await dbContext.SaveChangesAsync();
+        // await dbContext.SaveChangesAsync();
         return championGuid;
     }
 
-    public async Task AddTeamComp(Participant teamCompDtos)
+    public async Task<Guid> AddTeamComp(Participant teamCompDtos)
     {
         string hash = CalculateTeamCompHash(teamCompDtos);
-        TeamCompEntity? teamCompEntity = await TeamCompBaseQuery().Where(t => t.ContentHash == hash).FirstOrDefaultAsync();
+
+        TeamCompEntity? teamCompEntity = await TeamCompBaseQuery().Where(t => t.ContentHash == hash).FirstOrDefaultAsync()
+                                        ?? dbContext.TeamComps.Local.FirstOrDefault( t => t.ContentHash == hash);
+        Guid teamCompGuid;
         if (teamCompEntity != null)
         {
             Console.WriteLine($"HAVE ALREADY SEEN TEAM COMP {hash}");
@@ -95,6 +100,7 @@ public class DataService
             decimal newAveragePlacement = ((formerAveragePlacement * teamCompEntity.TotalInstances) + teamCompDtos.placement) / (teamCompEntity.TotalInstances + 1);
             teamCompEntity.AveragePlacement = newAveragePlacement;
             teamCompEntity.TotalInstances = teamCompEntity.TotalInstances + 1;
+            teamCompGuid = teamCompEntity.TeamCompId;
         }
         else
         {
@@ -109,9 +115,10 @@ public class DataService
                 }
                 championHashes.Add(CalculateWeakChampionHash(cleanedChampionName, unit));
             }
+            teamCompGuid = Guid.NewGuid();
             var newTeamCompEntity = new TeamCompEntity
             {
-                TeamCompId = Guid.NewGuid(),
+                TeamCompId = teamCompGuid,
                 ContentHash = hash,
                 AveragePlacement = teamCompDtos.placement,
                 TotalInstances = 1,
@@ -119,16 +126,27 @@ public class DataService
             };
             await dbContext.TeamComps.AddAsync(newTeamCompEntity);
         }
-        await dbContext.SaveChangesAsync();
-        return;
+        // await dbContext.SaveChangesAsync();
+        return teamCompGuid;
     }
 
-    public Task AddMatch(Match match)
+    public async Task AddMatch(Match match)
     {
-
-
-
-        return Task.CompletedTask;
+        foreach (Participant participant in match.info.participants)
+        {
+            List<Guid> unitIds = new List<Guid>();
+            foreach (Unit unit in participant.units)
+            {
+                Guid? championGuid = await AddChampionEntity(unit, participant.placement);
+                if (championGuid != null)
+                {
+                    unitIds.Add(championGuid.Value);
+                }
+            }
+            Guid teamCompGuid = await AddTeamComp(participant);
+        }
+        await dbContext.SaveChangesAsync();
+        return;
     }
 
     public string? CleanChampionName(string championName)
