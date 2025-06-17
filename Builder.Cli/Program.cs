@@ -28,15 +28,10 @@ namespace Builder.Cli
 
                     var dbContext = services.GetRequiredService<StatisticsDbContext>();
 
-                    Console.WriteLine("Applying database migrations...");
                     await dbContext.Database.MigrateAsync();
-                    Console.WriteLine("Database migrations applied successfully!");
-
 
                     var configuration = services.GetRequiredService<IConfiguration>();
                     var apiKey = configuration["ApiKeys:RiotApiKey"];
-                    Console.WriteLine($"Riot API Key (from configuration): {apiKey}"); // Moved here!
-
 
 
                     var dataService = services.GetRequiredService<DataService>();
@@ -44,7 +39,6 @@ namespace Builder.Cli
                     var matchDataRequestService = services.GetRequiredService<MatchDataRequestService>();
 
                     await BuildDatabase(dataService, configuration, matchDataRequestService, matchIDRequestService);
-                    Console.WriteLine("Console application finished.");
                 }
                 catch (Exception ex)
                 {
@@ -103,11 +97,16 @@ namespace Builder.Cli
             Queue<string> matchBFSQueue = new Queue<string>();
             await addMatchesToQueue(initialPUUID, matchIDRequestService, matchBFSQueue, visitedMatchIds);
             int gamesChecked = 0;
-            int maxSize = 5;
+            int maxSize = 10000;
             while (gamesChecked < maxSize)
             {
                 string currentMatchId = matchBFSQueue.Dequeue();
                 Match currentMatch = await matchDataRequestService.GetMatchData(currentMatchId) ?? throw new Exception($"Could not get match data for match Id {currentMatchId}");
+                if (currentMatch.info.tft_game_type != "standard" || currentMatch.info.tft_set_number != 14 || currentMatch.info.queue_id != 1100)
+                {
+                    Console.WriteLine("FOUND A NON-RANKED GAME");
+                    continue;
+                }
                 await dataService.AddMatch(currentMatch);
 
                 List<Participant> participants = currentMatch.info.participants;
@@ -123,7 +122,7 @@ namespace Builder.Cli
                 {
                     await addMatchesToQueue(puuid, matchIDRequestService, matchBFSQueue, visitedMatchIds);
                 }
-                Thread.Sleep(2000);
+                await Task.Delay(5000);
                 gamesChecked++;
             }
         }

@@ -26,7 +26,6 @@ public class MatchIDRequestService
     public async Task<List<string>> getMatchIDs(string puuid)
     {
         string adjustedPath = requestPath.Replace("{puuid}", puuid);
-        Console.WriteLine(adjustedPath);
         try
         {
             var results = await _httpClient.GetFromJsonAsync<List<string>>(adjustedPath);

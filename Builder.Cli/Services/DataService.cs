@@ -50,7 +50,6 @@ public class DataService
         {
             throw new Exception($"Failed to parse {cleanedChampionName}");
         }
-        Console.WriteLine($"THIS IS THE CHAMPION: {champion}");
         string hashed = CalculateChampionHash(cleanedChampionName, itemNames, championDtos);
 
         ChampionEntity? championEntity = await ChampionBaseQuery().Where(t => t.ContentHash == hashed).FirstOrDefaultAsync()
@@ -59,7 +58,6 @@ public class DataService
 
         if (championEntity != null)
         {
-            Console.WriteLine($"HAVE ALREADY SEEN {cleanedChampionName}, {itemNames}, {championDtos.tier}");
             decimal formerAveragePlacement = championEntity.AveragePlacement;
             decimal newAveragePlacement = ((formerAveragePlacement * championEntity.TotalInstances) + newPlacement) / (championEntity.TotalInstances + 1);
             championEntity.AveragePlacement = newAveragePlacement;
@@ -69,7 +67,6 @@ public class DataService
         }
         else
         {
-            Console.WriteLine($"NEW CHAMPION {cleanedChampionName}, {itemNames}, {championDtos.tier}");
             championGuid = Guid.NewGuid();
             var newChampionEntity = new ChampionEntity
             {
@@ -95,7 +92,6 @@ public class DataService
         Guid teamCompGuid;
         if (teamCompEntity != null)
         {
-            Console.WriteLine($"HAVE ALREADY SEEN TEAM COMP {hash}");
             decimal formerAveragePlacement = teamCompEntity.AveragePlacement;
             decimal newAveragePlacement = ((formerAveragePlacement * teamCompEntity.TotalInstances) + teamCompDtos.placement) / (teamCompEntity.TotalInstances + 1);
             teamCompEntity.AveragePlacement = newAveragePlacement;
@@ -105,7 +101,6 @@ public class DataService
         }
         else
         {
-            Console.WriteLine($"NEW TEAM COMP {hash}");
             List<string> championHashes = new List<string>();
             foreach (Unit unit in teamCompDtos.units)
             {
@@ -149,7 +144,10 @@ public class DataService
                 TeamCompChampionJoinEntity? join = await TeamCompChampionJoinBaseQuery()
                                                     .Where(t => t.TeamCompId == teamCompEntity.TeamCompId
                                                             && t.ChampionEntityId == champion.ChampionEntityId)
-                                                    .FirstOrDefaultAsync();
+                                                    .FirstOrDefaultAsync()
+                                                    ?? dbContext.TeamCompChampions.Local.Where(t => t.TeamCompId == teamCompEntity.TeamCompId
+                                                            && t.ChampionEntityId == champion.ChampionEntityId)
+                                                    .FirstOrDefault();
                 if (join == null)
                 {
                     TeamCompChampionJoinEntity newJoin = new TeamCompChampionJoinEntity
@@ -171,6 +169,10 @@ public class DataService
     {
         string newName = championName.Replace("TFT14_", "").Replace(" ", "").Replace("'", "");
         if (newName.Contains("Summon"))
+        {
+            return null;
+        }
+        else if (newName.Contains("TFTEvent"))
         {
             return null;
         }
