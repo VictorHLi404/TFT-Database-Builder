@@ -16,5 +16,19 @@
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         }
+    },
+    {
+        "name" : "Run LambdaApi (Local)",
+        "type" : "coreclr",
+        "request": "launch",
+        "preLaunchTask": "dotnet: build",
+        "program": "${workspaceFolder}/Builder.LambdaApi/bin/Debug/net8.0/Builder.LambdaApi.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/Builder.LambdaApi/bin/Debug/net8.0",
+        "stopAtEntry": false,
+        "console": "internalConsole",
+        "env": {
+            "ASPNETCORE_ENVIRONMENT": "Development"
+        }
     }]
 }
