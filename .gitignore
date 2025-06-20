@@ -1,0 +1,71 @@
+# Visual Studio files
+.vs/
+*.suo
+*.user
+*.aps
+*.ide
+*.vspscc
+*.vssscc
+*.bak
+*.scc
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+[Ss]cratch/
+[Tt]emp/
+[Tt]estResults/
+[Pp]ublish/
+*.publish/
+
+# Rider files
+.idea/
+*.iml
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuget/*.json
+*.nuget/packages/
+packages/
+.nuget/
+.nuke/
+
+# dotnet tool restore
+.config/dotnet-tools.json
+.config/dotnet-tools.json.bak
+
+# Package files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Intermediate files
+*.log
+*.pdb
+*.exe
+*.dll
+*.xml # For generated XML documentation files, unless you explicitly want to commit them
+
+# User secrets (crucial for security)
+.secrets/
+.usersecrets/
+secrets.json # The actual secrets file is usually outside the project, but exclude any local copies
+
+# AWS Lambda publish output (if not within bin/Release/netX.0/publish, which is already excluded)
+# If you put your 'publish' folder directly at the project root, uncomment/add these:
+# publish/
+# *.zip
+
+# Other common temp/cache files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.swn
+*.tags
+.DS_Store # macOS specific
+Thumbs.db # Windows specific
