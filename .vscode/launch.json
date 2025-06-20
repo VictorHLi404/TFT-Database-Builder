@@ -8,9 +8,9 @@
         "type" : "coreclr",
         "request": "launch",
         "preLaunchTask": "dotnet: build",
-        "program": "${workspaceFolder}/Builder.Cli/bin/Debug/net9.0/Builder.Cli.dll",
+        "program": "${workspaceFolder}/Builder.Cli/bin/Debug/net8.0/Builder.Cli.dll",
         "args": [],
-        "cwd": "${workspaceFolder}/Builder.Cli/bin/Debug/net9.0",
+        "cwd": "${workspaceFolder}/Builder.Cli/bin/Debug/net8.0",
         "stopAtEntry": false,
         "console": "internalConsole",
         "env": {
