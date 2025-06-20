@@ -22,7 +22,7 @@
         "type" : "coreclr",
         "request": "launch",
         "preLaunchTask": "dotnet: build",
-        "program": "${workspaceFolder}/Builder.LambdaApi/bin/Debug/net8.0/Builder.LambdaApi.dll",
+        "program": "${workspaceFolder}/Builder.LambdaApi/bin/Debug/net8.0/LambdaApi.dll",
         "args": [],
         "cwd": "${workspaceFolder}/Builder.LambdaApi/bin/Debug/net8.0",
         "stopAtEntry": false,

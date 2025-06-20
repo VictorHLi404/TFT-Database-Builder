@@ -2,11 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using Builder.Data; // Ensure this namespace matches where StatisticsDbContext resides
-using System;
-using System.Threading.Tasks;
+using Builder.Data;
 using Builder.Cli.Services;
-using System.Runtime.CompilerServices;
 using Builder.Cli.Dtos;
 using Npgsql;
 
