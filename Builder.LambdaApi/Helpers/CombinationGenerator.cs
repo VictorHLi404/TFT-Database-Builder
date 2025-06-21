@@ -19,7 +19,7 @@ public static class CombiationGenerator
             int n = subsets.Count;
             for (int j = 0; j < n; j++)
             {
-                List<int> newSubset = new List<int>(subsets[i]);
+                List<int> newSubset = new List<int>(subsets[j]);
                 newSubset.Add(i);
                 subsets.Add(newSubset);
             }
