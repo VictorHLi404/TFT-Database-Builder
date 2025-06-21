@@ -50,7 +50,8 @@ public class DataService
         {
             throw new Exception($"Failed to parse {cleanedChampionName}");
         }
-        string hashed = CalculateChampionHash(cleanedChampionName, itemNames, championDtos);
+        int tier = championDtos.tier;
+        string hashed = CalculateChampionHash(cleanedChampionName, itemNames, tier);
 
         ChampionEntity? championEntity = await ChampionBaseQuery().Where(t => t.ContentHash == hashed).FirstOrDefaultAsync()
                                         ?? dbContext.ChampionEntities.Local.FirstOrDefault(t => t.ContentHash == hashed);
@@ -165,7 +166,7 @@ public class DataService
         return;
     }
 
-    public string? CleanChampionName(string championName)
+    public static string? CleanChampionName(string championName)
     {
         string newName = championName.Replace("TFT14_", "").Replace(" ", "").Replace("'", "");
         if (newName.Contains("Summon"))
@@ -187,15 +188,15 @@ public class DataService
         return newName;
     }
 
-    public string GetItemString(List<string> items)
+    public static string GetItemString(List<string> items)
     {
         items.Sort();
         return string.Join("-", items).Replace(" ", "").Replace("'", "");
     }
 
-    public string CalculateChampionHash(string cleanedChampionName, string items, Unit championDtos)
+    public static string CalculateChampionHash(string cleanedChampionName, string items, int tier)
     {
-        string contentToHash = $"{cleanedChampionName}-{items}-{championDtos.tier}";
+        string contentToHash = $"{cleanedChampionName}-{items}-{tier}";
         using (SHA256 sha256Hash = SHA256.Create())
         {
             byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
@@ -203,7 +204,7 @@ public class DataService
         }
     }
 
-    public string CalculateWeakChampionHash(string cleanedChampionName, Unit championDtos)
+    public static string CalculateWeakChampionHash(string cleanedChampionName, Unit championDtos)
     {
         string contentToHash = $"{cleanedChampionName}-{championDtos.tier}";
         using (SHA256 sha256Hash = SHA256.Create())
@@ -213,7 +214,7 @@ public class DataService
         } 
     }
 
-    public string CalculateTeamCompHash(Participant participantDtos)
+    public static string CalculateTeamCompHash(Participant participantDtos)
     {
         string contentToHash = "";
         List<Unit> sortedChampions = participantDtos.units.OrderBy(t => t.character_id)

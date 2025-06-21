@@ -13,7 +13,7 @@ public enum ItemEnum
     Deathblade,
     GiantSlayer,
     HextechGunblade,
-    SpearofShojin,
+    SpearOfShojin,
     EdgeofNight,
     Bloodthirster,
     SteraksGage,
