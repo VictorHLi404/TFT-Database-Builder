@@ -32,10 +32,10 @@ public class ChampionController : ControllerBase
 
     [HttpGet("ChampionItems", Name = "GetChampionItems")]
 
-    public async Task<IActionResult> GetChampionItems([FromBody] ChampionItemStatisticsRequest request)
+    public async Task<IActionResult> GetChampionWinrateFromItems([FromBody] ChampionItemStatisticsRequest request)
     {
-        await championService.GetSimilarWinrates(request.MainChampion, request.items);
-        return Ok();
+        var results = await championService.GetSimilarWinrates(request.MainChampion, request.items);
+        return Ok(results);
     }
 
     // [HttpGet(Name = "GetTest")]
@@ -49,4 +49,5 @@ public class ChampionController : ControllerBase
     //     })
     //     .ToArray();
     // }
+    
 }
