@@ -1,4 +1,4 @@
-namespace Builder.Cli.Dtos;
+namespace Builder.Common.Dtos.RiotApi;
 public class Metadata
 {
     public string? data_version { get; set; }

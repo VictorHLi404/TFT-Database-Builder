@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using Builder.Cli.Dtos;
+using Builder.Common.Dtos.RiotApi;
 using Builder.Data;
 using Builder.Data.Entities;
 using Microsoft.EntityFrameworkCore;

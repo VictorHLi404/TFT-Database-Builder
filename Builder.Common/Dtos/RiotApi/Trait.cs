@@ -1,4 +1,4 @@
-namespace Builder.Cli.Dtos;
+namespace Builder.Common.Dtos.RiotApi;
 public class Trait
 {
     public string name { get; set; } = ""; // Trait name.

@@ -1,4 +1,4 @@
-namespace Builder.Cli.Dtos;
+namespace Builder.Common.Dtos.RiotApi;
 public class Participant
 {
     public Companion? companion { get; set; } // Participant's companion.

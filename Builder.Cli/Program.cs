@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Builder.Data;
 using Builder.Cli.Services;
-using Builder.Cli.Dtos;
+using Builder.Common.Dtos.RiotApi;
 using Npgsql;
 
 namespace Builder.Cli

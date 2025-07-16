@@ -2,7 +2,7 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
-using Builder.Cli.Dtos;
+using Builder.Common.Dtos.RiotApi;
 using Builder.Data;
 using Builder.Data.Entities;
 using Builder.Data.Enums;
