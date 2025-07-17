@@ -8,6 +8,7 @@ using Builder.Data.Entities;
 using Builder.Common.Enums;
 using Builder.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Builder.Common.Models.Hashes;
 
 namespace Builder.Cli.Services;
 
@@ -40,7 +41,7 @@ public class DataService
 
     public async Task<ChampionEntity?> AddChampionEntity(Unit championDtos, int newPlacement)
     {
-        var cleanedChampionName = CleanChampionName(championDtos.character_id);
+        var cleanedChampionName = ProcessingHelper.CleanChampionName(championDtos.character_id);
         if (cleanedChampionName == null)
         {
             return null;
@@ -51,8 +52,7 @@ public class DataService
         {
             throw new Exception($"Failed to parse {cleanedChampionName}");
         }
-        int tier = championDtos.tier;
-        string hashed = HashHelper.CalculateChampionHash(cleanedChampionName, itemNames, tier);
+        string hashed = CalculateChampionHash(championDtos);
 
         ChampionEntity? championEntity = await ChampionBaseQuery().Where(t => t.ContentHash == hashed).FirstOrDefaultAsync()
                                         ?? dbContext.ChampionEntities.Local.FirstOrDefault(t => t.ContentHash == hashed);
@@ -87,10 +87,10 @@ public class DataService
 
     public async Task<TeamCompEntity> AddTeamComp(Participant teamCompDtos)
     {
-        string hash = HashHelper.CalculateTeamCompHash(teamCompDtos);
+        string hash = CalculateTeamCompHash(teamCompDtos);
 
         TeamCompEntity? teamCompEntity = await TeamCompBaseQuery().Where(t => t.ContentHash == hash).FirstOrDefaultAsync()
-                                        ?? dbContext.TeamComps.Local.FirstOrDefault( t => t.ContentHash == hash);
+                                        ?? dbContext.TeamComps.Local.FirstOrDefault(t => t.ContentHash == hash);
         Guid teamCompGuid;
         if (teamCompEntity != null)
         {
@@ -106,12 +106,12 @@ public class DataService
             List<string> championHashes = new List<string>();
             foreach (Unit unit in teamCompDtos.units)
             {
-                var cleanedChampionName = CleanChampionName(unit.character_id);
+                var cleanedChampionName = ProcessingHelper.CleanChampionName(unit.character_id);
                 if (cleanedChampionName == null)
                 {
                     continue;
                 }
-                championHashes.Add(HashHelper.CalculateWeakChampionHash(cleanedChampionName, unit));
+                championHashes.Add(CalculateWeakChampionHash(unit));
             }
             teamCompGuid = Guid.NewGuid();
             var newTeamCompEntity = new TeamCompEntity
@@ -161,86 +161,46 @@ public class DataService
                     };
                     await dbContext.TeamCompChampions.AddAsync(newJoin);
                 }
-            } 
+            }
         }
         await dbContext.SaveChangesAsync();
         return;
     }
 
-    public static string? CleanChampionName(string championName)
+    private string CalculateChampionHash(Unit champion)
     {
-        string newName = championName.Replace("TFT14_", "").Replace(" ", "").Replace("'", "");
-        if (newName.Contains("Summon"))
+        return HashHelper.CalculateChampionHash(new()
         {
-            return null;
-        }
-        else if (newName.Contains("TFTEvent"))
-        {
-            return null;
-        }
-        if (newName.Contains("NidaleeCougar"))
-        {
-            newName = newName.Replace("NidaleeCougar", "Nidalee");
-        }
-        else if (newName.Contains("Jarvan"))
-        {
-            newName = newName.Replace("Jarvan", "JarvanIV");
-        }
-        return newName;
+            ChampionName = ProcessingHelper.CleanChampionName(champion.character_id) ?? throw new Exception("Cannot calculate champion hash of an invalid champion"),
+            Items = ProcessingHelper.GetItemString(champion.itemNames),
+            Level = champion.tier
+        });
     }
 
-    // public static string GetItemString(List<string> items)
-    // {
-    //     items.Sort();
-    //     return string.Join("-", items).Replace(" ", "").Replace("'", "");
-    // }
+    private string CalculateWeakChampionHash(Unit champion)
+    {
+        return HashHelper.CalculateWeakChampionHash(new()
+        {
+            ChampionName = ProcessingHelper.CleanChampionName(champion.character_id) ?? throw new Exception("Cannot calculate champion hash of an invalid champion"),
+            Level = champion.tier
+        });
+    }
 
-    // public static string CalculateChampionHash(string cleanedChampionName, string items, int tier)
-    // {
-    //     string contentToHash = $"{cleanedChampionName}-{items}-{tier}";
-    //     using (SHA256 sha256Hash = SHA256.Create())
-    //     {
-    //         byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-    //         return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
-    //     }
-    // }
+    public static string CalculateTeamCompHash(Participant participantDtos)
+    {
+        var sortedChampions = participantDtos.units.OrderBy(t => t.character_id)
+            .ThenBy(t => ProcessingHelper.GetItemString(t.itemNames))
+            .Where(t => ProcessingHelper.CleanChampionName(t.character_id) != null)
+            .ToList();
 
-    // public static string CalculateWeakChampionHash(string cleanedChampionName, Unit championDtos)
-    // {
-    //     string contentToHash = $"{cleanedChampionName}-{championDtos.tier}";
-    //     using (SHA256 sha256Hash = SHA256.Create())
-    //     {
-    //         byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-    //         return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
-    //     } 
-    // }
-
-    // public static string CalculateTeamCompHash(Participant participantDtos)
-    // {
-    //     string contentToHash = "";
-    //     List<Unit> sortedChampions = participantDtos.units.OrderBy(t => t.character_id)
-    //         .ThenBy(t =>
-    //         {
-    //         var sortedItemNames = t.itemNames.OrderBy(item => item).ToList();
-    //         return string.Join("-", sortedItemNames).Replace(" ", "").Replace("'", "");
-    //         })
-    //         .ToList();
-    //     foreach (Unit unit in sortedChampions)
-    //     {
-    //         string cleanedChampionName = CleanChampionName(unit.character_id);
-    //         if (cleanedChampionName == null) continue;
-    //         contentToHash += CalculateWeakChampionHash(cleanedChampionName, unit);
-    //     }
-    //     using (SHA256 sha256Hash = SHA256.Create())
-    //     {
-    //         byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-    //         return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
-    //     }
-    // }
-
-
-    
-
-    
-
+        var championHashRequests = sortedChampions.Select(x => new WeakChampionHashCreateModel
+        {
+            ChampionName = ProcessingHelper.CleanChampionName(x.character_id) ?? throw new Exception("Cannot calculate champion hash of an invalid champion"),
+            Level = x.tier
+        }).ToList();
+        return HashHelper.CalculateTeamCompHash(new()
+        {
+           ChampionHashRequests = championHashRequests 
+        });
+    }
 }

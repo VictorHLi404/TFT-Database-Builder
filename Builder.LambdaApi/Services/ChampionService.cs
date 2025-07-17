@@ -23,8 +23,7 @@ public class ChampionService
 
     public async Task<decimal> GetChampionAveragePlacement(ChampionRequest champion)
     {
-        string itemNames = string.Join("-", champion.Items.Select(x => x.ToString()).ToList());
-        string contentHash = HashHelper.CalculateChampionHash(champion.ChampionName.ToString(), itemNames, champion.Level);
+        string contentHash = CalculateChampionHash(champion);
         return await ChampionBaseQuery().Where(t => t.ContentHash == contentHash).Select(t => t.AveragePlacement).FirstOrDefaultAsync();
     }
 
@@ -38,9 +37,7 @@ public class ChampionService
                                                             items[subset[1]].ToString() }
                                                             .OrderBy(s => s).ToList())
                                         .ToList();
-        List<string> twoItemHashes = twoItemNames.Select(itemNames => HashHelper.CalculateChampionHash(originalChampion.ChampionName.ToString(),
-                                                                                                        string.Join("-", itemNames),
-                                                                                                        originalChampion.Level)).ToList();
+        List<string> twoItemHashes = twoItemNames.Select(itemNames => CalculateChampionHash(originalChampion, itemNames)).ToList();
 
         var twoItemChampions = await ChampionBaseQuery().Where(t => twoItemHashes.Contains(t.ContentHash)).OrderBy(t => t.AveragePlacement).Take(5).ToListAsync();
 
@@ -50,9 +47,7 @@ public class ChampionService
                                                     items[subset[2]].ToString() }
                                                     .OrderBy(s => s).ToList())
                                                     .ToList();
-        List<string> threeItemHashes = threeItemNames.Select(itemNames => HashHelper.CalculateChampionHash(originalChampion.ChampionName.ToString(),
-                                                                                                        string.Join("-", itemNames),
-                                                                                                        originalChampion.Level)).ToList();
+        List<string> threeItemHashes = threeItemNames.Select(itemNames => CalculateChampionHash(originalChampion, itemNames)).ToList();
 
         var threeItemChampions = await ChampionBaseQuery().Where(t => threeItemHashes.Contains(t.ContentHash)).OrderBy(t => t.AveragePlacement).Take(5).ToListAsync();
 
@@ -60,5 +55,25 @@ public class ChampionService
                                 .OrderBy(t => t.AveragePlacement)
                                 .Take(5)
                                 .ToList();
+    }
+
+    private string CalculateChampionHash(ChampionRequest champion, List<string> items)
+    {
+        return HashHelper.CalculateChampionHash(new()
+        {
+            ChampionName = ProcessingHelper.CleanChampionName(champion.ChampionName.ToString()) ?? throw new Exception("Could not parse the champion name provided"),
+            Items = string.Join("-", items),
+            Level = champion.Level
+        });
+    }
+
+    private string CalculateChampionHash(ChampionRequest champion)
+    {
+        return HashHelper.CalculateChampionHash(new()
+        {
+            ChampionName = ProcessingHelper.CleanChampionName(champion.ChampionName.ToString()) ?? throw new Exception("Could not parse the champion name provided"),
+            Items = string.Join("-", champion.Items.Select(x => x.ToString()).ToList()),
+            Level = champion.Level
+        });
     }
 }

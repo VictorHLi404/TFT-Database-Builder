@@ -1,14 +1,17 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using Builder.Common.Dtos.LambdaApi;
 using Builder.Common.Dtos.RiotApi;
+using Builder.Common.Models.Hashes;
 
 namespace Builder.Common.Helpers;
 
 public class HashHelper
 {
-    public static string CalculateChampionHash(string cleanedChampionName, string items, int tier)
+    public static string CalculateChampionHash(ChampionHashCreateModel request)
     {
-        string contentToHash = $"{cleanedChampionName}-{items}-{tier}";
+        string contentToHash = $"{request.ChampionName}-{request.Items}-{request.Level}";
         using (SHA256 sha256Hash = SHA256.Create())
         {
             byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
@@ -16,31 +19,22 @@ public class HashHelper
         }
     }
 
-    public static string CalculateWeakChampionHash(string cleanedChampionName, Unit championDtos)
+    public static string CalculateWeakChampionHash(WeakChampionHashCreateModel request)
     {
-        string contentToHash = $"{cleanedChampionName}-{championDtos.tier}";
+        string contentToHash = $"{request.ChampionName}-{request.Level}";
         using (SHA256 sha256Hash = SHA256.Create())
         {
             byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
             return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
-        } 
+        }
     }
 
-    public static string CalculateTeamCompHash(Participant participantDtos)
+    public static string CalculateTeamCompHash(TeamCompHashCreateModel request)
     {
         string contentToHash = "";
-        List<Unit> sortedChampions = participantDtos.units.OrderBy(t => t.character_id)
-            .ThenBy(t =>
-            {
-            var sortedItemNames = t.itemNames.OrderBy(item => item).ToList();
-            return string.Join("-", sortedItemNames).Replace(" ", "").Replace("'", "");
-            })
-            .ToList();
-        foreach (Unit unit in sortedChampions)
+        foreach (var championHashRequest in request.ChampionHashRequests)
         {
-            var cleanedChampionName = ProcessingHelper.CleanChampionName(unit.character_id);
-            if (cleanedChampionName == null) continue;
-            contentToHash += CalculateWeakChampionHash(cleanedChampionName, unit);
+            contentToHash += CalculateWeakChampionHash(championHashRequest);
         }
         using (SHA256 sha256Hash = SHA256.Create())
         {
