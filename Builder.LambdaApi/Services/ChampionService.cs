@@ -1,7 +1,7 @@
 using Builder.Data;
-using Builder.LambdaApi.Dtos;
+using Builder.Common.Dtos.LambdaApi;
 using Builder.Data.Entities;
-using Builder.Data.Enums;
+using Builder.Common.Enums;
 using Builder.Cli.Services;
 using Builder.LambdaApi.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +48,7 @@ public class ChampionService
                                                     "TFT_Item_" + items[subset[1]].ToString(),
                                                     "TFT_Item_" + items[subset[2]].ToString() }
                                                     .OrderBy(s => s).ToList())
-                                                .ToList();
+                                                    .ToList();
         List<string> threeItemHashes = threeItemNames.Select(itemNames => DataService.CalculateChampionHash(originalChampion.ChampionName.ToString(),
                                                                                                         string.Join("-", itemNames),
                                                                                                         originalChampion.Level)).ToList();

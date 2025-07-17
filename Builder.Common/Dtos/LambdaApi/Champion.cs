@@ -1,6 +1,6 @@
-using Builder.Data.Enums;
+using Builder.Common.Enums;
 
-namespace Builder.LambdaApi.Dtos;
+namespace Builder.Common.Dtos.LambdaApi;
 
 public class Champion
 {

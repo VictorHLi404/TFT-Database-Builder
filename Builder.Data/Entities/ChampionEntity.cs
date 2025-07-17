@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Builder.Data.Enums;
+using Builder.Common.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Builder.Data.Entities;

@@ -5,7 +5,7 @@ using System.Text;
 using Builder.Common.Dtos.RiotApi;
 using Builder.Data;
 using Builder.Data.Entities;
-using Builder.Data.Enums;
+using Builder.Common.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Builder.Cli.Services;

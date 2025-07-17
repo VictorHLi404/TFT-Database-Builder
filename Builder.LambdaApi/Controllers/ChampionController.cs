@@ -1,5 +1,4 @@
-using Builder.Data.Enums;
-using Builder.LambdaApi.Dtos;
+using Builder.Common.Dtos.LambdaApi;
 using Builder.LambdaApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,11 +8,6 @@ namespace Builder.LambdaApi.Controllers;
 [Route("[controller]")]
 public class ChampionController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
     private readonly ILogger<ChampionController> _logger;
     private readonly ChampionService championService;
 
@@ -37,17 +31,4 @@ public class ChampionController : ControllerBase
         var results = await championService.GetSimilarWinrates(request.MainChampion, request.items);
         return Ok(results);
     }
-
-    // [HttpGet(Name = "GetTest")]
-    // public IEnumerable<WeatherForecast> Get([FromQuery] string query)
-    // {
-    //     return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-    //     {
-    //         Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-    //         TemperatureC = Random.Shared.Next(-20, 55),
-    //         Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-    //     })
-    //     .ToArray();
-    // }
-    
 }

@@ -1,4 +1,4 @@
-namespace Builder.Data.Enums;
+namespace Builder.Common.Enums;
 
 public enum ItemEnum
 {
