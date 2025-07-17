@@ -6,6 +6,7 @@ using Builder.Common.Dtos.RiotApi;
 using Builder.Data;
 using Builder.Data.Entities;
 using Builder.Common.Enums;
+using Builder.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Builder.Cli.Services;
@@ -39,19 +40,19 @@ public class DataService
 
     public async Task<ChampionEntity?> AddChampionEntity(Unit championDtos, int newPlacement)
     {
-        string cleanedChampionName = CleanChampionName(championDtos.character_id);
+        var cleanedChampionName = CleanChampionName(championDtos.character_id);
         if (cleanedChampionName == null)
         {
             return null;
         }
-        string itemNames = GetItemString(championDtos.itemNames);
+        string itemNames = ProcessingHelper.GetItemString(championDtos.itemNames);
         ChampionEnum champion;
         if (!ChampionEnum.TryParse(cleanedChampionName, true, out champion))
         {
             throw new Exception($"Failed to parse {cleanedChampionName}");
         }
         int tier = championDtos.tier;
-        string hashed = CalculateChampionHash(cleanedChampionName, itemNames, tier);
+        string hashed = HashHelper.CalculateChampionHash(cleanedChampionName, itemNames, tier);
 
         ChampionEntity? championEntity = await ChampionBaseQuery().Where(t => t.ContentHash == hashed).FirstOrDefaultAsync()
                                         ?? dbContext.ChampionEntities.Local.FirstOrDefault(t => t.ContentHash == hashed);
@@ -86,7 +87,7 @@ public class DataService
 
     public async Task<TeamCompEntity> AddTeamComp(Participant teamCompDtos)
     {
-        string hash = CalculateTeamCompHash(teamCompDtos);
+        string hash = HashHelper.CalculateTeamCompHash(teamCompDtos);
 
         TeamCompEntity? teamCompEntity = await TeamCompBaseQuery().Where(t => t.ContentHash == hash).FirstOrDefaultAsync()
                                         ?? dbContext.TeamComps.Local.FirstOrDefault( t => t.ContentHash == hash);
@@ -105,12 +106,12 @@ public class DataService
             List<string> championHashes = new List<string>();
             foreach (Unit unit in teamCompDtos.units)
             {
-                string cleanedChampionName = CleanChampionName(unit.character_id);
+                var cleanedChampionName = CleanChampionName(unit.character_id);
                 if (cleanedChampionName == null)
                 {
                     continue;
                 }
-                championHashes.Add(CalculateWeakChampionHash(cleanedChampionName, unit));
+                championHashes.Add(HashHelper.CalculateWeakChampionHash(cleanedChampionName, unit));
             }
             teamCompGuid = Guid.NewGuid();
             var newTeamCompEntity = new TeamCompEntity
@@ -188,54 +189,54 @@ public class DataService
         return newName;
     }
 
-    public static string GetItemString(List<string> items)
-    {
-        items.Sort();
-        return string.Join("-", items).Replace(" ", "").Replace("'", "");
-    }
+    // public static string GetItemString(List<string> items)
+    // {
+    //     items.Sort();
+    //     return string.Join("-", items).Replace(" ", "").Replace("'", "");
+    // }
 
-    public static string CalculateChampionHash(string cleanedChampionName, string items, int tier)
-    {
-        string contentToHash = $"{cleanedChampionName}-{items}-{tier}";
-        using (SHA256 sha256Hash = SHA256.Create())
-        {
-            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-            return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
-        }
-    }
+    // public static string CalculateChampionHash(string cleanedChampionName, string items, int tier)
+    // {
+    //     string contentToHash = $"{cleanedChampionName}-{items}-{tier}";
+    //     using (SHA256 sha256Hash = SHA256.Create())
+    //     {
+    //         byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
+    //         return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+    //     }
+    // }
 
-    public static string CalculateWeakChampionHash(string cleanedChampionName, Unit championDtos)
-    {
-        string contentToHash = $"{cleanedChampionName}-{championDtos.tier}";
-        using (SHA256 sha256Hash = SHA256.Create())
-        {
-            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-            return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
-        } 
-    }
+    // public static string CalculateWeakChampionHash(string cleanedChampionName, Unit championDtos)
+    // {
+    //     string contentToHash = $"{cleanedChampionName}-{championDtos.tier}";
+    //     using (SHA256 sha256Hash = SHA256.Create())
+    //     {
+    //         byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
+    //         return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+    //     } 
+    // }
 
-    public static string CalculateTeamCompHash(Participant participantDtos)
-    {
-        string contentToHash = "";
-        List<Unit> sortedChampions = participantDtos.units.OrderBy(t => t.character_id)
-            .ThenBy(t =>
-            {
-            var sortedItemNames = t.itemNames.OrderBy(item => item).ToList();
-            return string.Join("-", sortedItemNames).Replace(" ", "").Replace("'", "");
-            })
-            .ToList();
-        foreach (Unit unit in sortedChampions)
-        {
-            string cleanedChampionName = CleanChampionName(unit.character_id);
-            if (cleanedChampionName == null) continue;
-            contentToHash += CalculateWeakChampionHash(cleanedChampionName, unit);
-        }
-        using (SHA256 sha256Hash = SHA256.Create())
-        {
-            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
-            return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
-        }
-    }
+    // public static string CalculateTeamCompHash(Participant participantDtos)
+    // {
+    //     string contentToHash = "";
+    //     List<Unit> sortedChampions = participantDtos.units.OrderBy(t => t.character_id)
+    //         .ThenBy(t =>
+    //         {
+    //         var sortedItemNames = t.itemNames.OrderBy(item => item).ToList();
+    //         return string.Join("-", sortedItemNames).Replace(" ", "").Replace("'", "");
+    //         })
+    //         .ToList();
+    //     foreach (Unit unit in sortedChampions)
+    //     {
+    //         string cleanedChampionName = CleanChampionName(unit.character_id);
+    //         if (cleanedChampionName == null) continue;
+    //         contentToHash += CalculateWeakChampionHash(cleanedChampionName, unit);
+    //     }
+    //     using (SHA256 sha256Hash = SHA256.Create())
+    //     {
+    //         byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(contentToHash));
+    //         return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+    //     }
+    // }
 
 
     

@@ -18,15 +18,15 @@ public class ChampionController : ControllerBase
         this.championService = championService;
     }
 
-    [HttpGet("ChampionWinrate", Name = "GetChampionWinrate")]
-    public async Task<IActionResult> GetChampionWinrate([FromBody] Champion champion)
+    [HttpGet("ChampionWinrate", Name = "GetChampionAveragePlacement")]
+    public async Task<IActionResult> GetChampionAveragePlacement([FromBody] ChampionRequest champion)
     {
-        return Ok(await championService.GetChampionWinrate(champion));
+        return Ok(await championService.GetChampionAveragePlacement(champion));
     }
 
     [HttpGet("ChampionItems", Name = "GetChampionItems")]
 
-    public async Task<IActionResult> GetChampionWinrateFromItems([FromBody] ChampionItemStatisticsRequest request)
+    public async Task<IActionResult> GetChampionAveragePlacementFromItems([FromBody] ChampionItemStatisticsRequest request)
     {
         var results = await championService.GetSimilarWinrates(request.MainChampion, request.items);
         return Ok(results);
