@@ -19,13 +19,14 @@ public class TeamService
         this.dbContext = dbContext;
     }
 
-    public IQueryable<TeamCompEntity> ChampionBaseQuery() =>
+    public IQueryable<TeamCompEntity> TeamCompBaseQuery() =>
         dbContext.TeamComps;
 
-    public async Task<decimal> GetTeamCompAveragePlacement(TeamRequest request)
+    public async Task<decimal?> GetTeamCompAveragePlacement(TeamRequest request)
     {
         var hash = CalculateTeamCompHash(request);
-        return 0;
+        var teamComp = await TeamCompBaseQuery().Where(x => x.ContentHash == hash).FirstOrDefaultAsync();
+        return teamComp?.AveragePlacement;
     }
 
     private string CalculateTeamCompHash(TeamRequest request)

@@ -40,7 +40,7 @@ namespace Builder.Cli
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine($"An error occurred during application execution: {ex.Message}");
-                    Console.Error.WriteLine(ex.StackTrace); 
+                    Console.Error.WriteLine(ex.StackTrace);
                 }
             }
         }

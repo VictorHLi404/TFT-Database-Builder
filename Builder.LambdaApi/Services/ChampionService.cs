@@ -6,6 +6,7 @@ using Builder.Common.Helpers;
 using Builder.Cli.Services;
 using Builder.LambdaApi.Helpers;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace Builder.LambdaApi.Services;
 
@@ -62,7 +63,7 @@ public class ChampionService
         return HashHelper.CalculateChampionHash(new()
         {
             ChampionName = ProcessingHelper.CleanChampionName(champion.ChampionName.ToString()) ?? throw new Exception("Could not parse the champion name provided"),
-            Items = string.Join("-", items),
+            Items = ProcessingHelper.GetItemString(items),
             Level = champion.Level
         });
     }
@@ -72,7 +73,7 @@ public class ChampionService
         return HashHelper.CalculateChampionHash(new()
         {
             ChampionName = ProcessingHelper.CleanChampionName(champion.ChampionName.ToString()) ?? throw new Exception("Could not parse the champion name provided"),
-            Items = string.Join("-", champion.Items.Select(x => x.ToString()).ToList()),
+            Items = ProcessingHelper.GetItemString(champion.Items.Select(x => x.ToString()).ToList()),
             Level = champion.Level
         });
     }

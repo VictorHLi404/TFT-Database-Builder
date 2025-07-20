@@ -34,7 +34,7 @@ public class ProcessingHelper
         for (int i = 1; i <= ConstantValues.TFT_SET_NUMBER; i++)
             cleanedItemName = cleanedItemName.Replace($"TFT{i}_Item_", "");
 
-        cleanedItemName = itemName.Replace("TFT_", "");
+        cleanedItemName = cleanedItemName.Replace("TFT_", "");
         for (int i = 1; i <= ConstantValues.TFT_SET_NUMBER; i++)
             cleanedItemName = cleanedItemName.Replace($"TFT{i}_", "");
 

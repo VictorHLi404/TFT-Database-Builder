@@ -38,6 +38,7 @@ builder.Services.AddDbContext<StatisticsDbContext>(options =>
 });
 
 builder.Services.AddScoped<ChampionService>();
+builder.Services.AddScoped<TeamService>();
 
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
