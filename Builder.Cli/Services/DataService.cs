@@ -170,24 +170,6 @@ public class DataService
             foreach (ChampionEntity champion in champions)
             {
                 potentialJoinKeys.Add((teamCompEntity.TeamCompId, champion.ChampionEntityId));
-                // TeamCompChampionJoinEntity? join = await TeamCompChampionJoinBaseQuery()
-                //                                     .Where(t => t.TeamCompId == teamCompEntity.TeamCompId
-                //                                             && t.ChampionEntityId == champion.ChampionEntityId)
-                //                                     .FirstOrDefaultAsync()
-                //                                     ?? dbContext.TeamCompChampions.Local.Where(t => t.TeamCompId == teamCompEntity.TeamCompId
-                //                                             && t.ChampionEntityId == champion.ChampionEntityId)
-                //                                     .FirstOrDefault();
-                // if (join == null)
-                // {
-                //     TeamCompChampionJoinEntity newJoin = new TeamCompChampionJoinEntity
-                //     {
-                //         TeamCompId = teamCompEntity.TeamCompId,
-                //         ChampionEntityId = champion.ChampionEntityId,
-                //         TeamComp = teamCompEntity,
-                //         Champion = champion,
-                //     };
-                //     await dbContext.TeamCompChampions.AddAsync(newJoin);
-                // }
             }
         }
         var teamCompIdsInCurrentContext = dbContext.ChangeTracker.Entries<TeamCompEntity>()
@@ -259,9 +241,10 @@ public class DataService
 
     private string CalculateTeamCompHash(Participant participantDtos)
     {
-        var sortedChampions = participantDtos.units.OrderBy(t => t.character_id)
-            .ThenBy(t => ProcessingHelper.GetItemString(t.itemNames))
+        var sortedChampions = participantDtos.units
             .Where(t => ProcessingHelper.CleanChampionName(t.character_id) != null)
+            .OrderBy(t => ProcessingHelper.CleanChampionName(t.character_id))
+            .ThenBy(t => ProcessingHelper.GetItemString(t.itemNames))
             .ToList();
 
         var championHashRequests = sortedChampions.Select(x => new WeakChampionHashCreateModel
