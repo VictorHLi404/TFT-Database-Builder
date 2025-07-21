@@ -4,6 +4,7 @@ using Builder.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Builder.Common.Helpers;
 using Builder.Common.Models.Hashes;
+using Builder.LambdaApi.Helpers;
 
 namespace Builder.LambdaApi.Services;
 
@@ -21,14 +22,23 @@ public class TeamService
 
     public async Task<decimal?> GetTeamCompAveragePlacement(TeamRequest request)
     {
-        var hash = CalculateTeamCompHash(request);
+        var hash = CalculateTeamCompHash(request.Champions);
         var teamComp = await TeamCompBaseQuery().Where(x => x.ContentHash == hash).FirstOrDefaultAsync();
         return teamComp?.AveragePlacement;
     }
 
-    private string CalculateTeamCompHash(TeamRequest request)
+    public async Task<List<TeamCompEntity>> GetTeamCompAlternatives(TeamRequest initialTeam, List<ChampionRequest> alternativeChampions)
     {
-        var sortedChampions = request.Champions.OrderBy(t => t.ChampionName.ToString())
+        int listLength = initialTeam.Level;
+
+        CombiationGenerator.GenerateListCombinationsWithDistance<ChampionRequest>(initialTeam.Champions, initialTeam.Champions, 2);
+
+        return [];
+    }
+
+    private string CalculateTeamCompHash(List<ChampionRequest> request)
+    {
+        var sortedChampions = request.OrderBy(t => t.ChampionName.ToString())
             .ThenBy(t => ProcessingHelper.GetItemString(t.Items.Select(x => x.ToString()).ToList()))
             .Where(t => ProcessingHelper.CleanChampionName(t.ChampionName.ToString()) != null)
             .ToList();

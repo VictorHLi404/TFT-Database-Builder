@@ -24,4 +24,10 @@ public class TeamController : ControllerBase
         return Ok(await teamService.GetTeamCompAveragePlacement(request));
     }
 
+    [HttpGet("TeamAlternativeComps", Name = "GetTeamAlternativeCompWinrates")]
+    public async Task<IActionResult> GetTeamAlternativeCompWinrates([FromBody] TeamAlternativeStatisticsRequest request)
+    {
+        return Ok(await teamService.GetTeamCompAlternatives(request.Team, request.AlternativeChampions));
+    }
+
 }
