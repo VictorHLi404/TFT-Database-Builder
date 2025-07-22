@@ -90,18 +90,19 @@ public class DataService
         Dictionary<string, TeamCompEntity> existingTeamCompEntities)
     {
         string hash = CalculateTeamCompHash(teamCompDtos);
+        string helperName = ProcessingHelper.GetTeamHelperName(teamCompDtos.units);
         TeamCompEntity? teamCompEntity = null;
 
         if (existingTeamCompEntities.TryGetValue(hash, out teamCompEntity))
         {
-            return UpdateTeamCompStatistics(teamCompEntity, teamCompDtos.placement);
+            return UpdateTeamCompStatistics(teamCompEntity, teamCompDtos.placement, helperName);
         }
 
         teamCompEntity = dbContext.TeamComps.Local.FirstOrDefault(t => t.ContentHash == hash);
 
         if (teamCompEntity != null)
         {
-            return UpdateTeamCompStatistics(teamCompEntity, teamCompDtos.placement);
+            return UpdateTeamCompStatistics(teamCompEntity, teamCompDtos.placement, helperName);
         }
         else
         {
@@ -123,6 +124,7 @@ public class DataService
                 AveragePlacement = teamCompDtos.placement,
                 TotalInstances = 1,
                 ChampionHashes = championHashes,
+                HelperName = helperName
             };
             await dbContext.TeamComps.AddAsync(newTeamCompEntity);
             existingTeamCompEntities.Add(hash, newTeamCompEntity);
@@ -259,12 +261,16 @@ public class DataService
         });
     }
 
-    private TeamCompEntity UpdateTeamCompStatistics(TeamCompEntity teamCompEntity, int newPlacement)
+    private TeamCompEntity UpdateTeamCompStatistics(TeamCompEntity teamCompEntity, int newPlacement, string helperName)
     {
         decimal formerAveragePlacement = teamCompEntity.AveragePlacement;
         decimal newAveragePlacement = ((formerAveragePlacement * teamCompEntity.TotalInstances) + newPlacement) / (teamCompEntity.TotalInstances + 1);
         teamCompEntity.AveragePlacement = newAveragePlacement;
         teamCompEntity.TotalInstances = teamCompEntity.TotalInstances + 1;
+
+        if (teamCompEntity.HelperName == null)
+            teamCompEntity.HelperName = helperName;
+
         return teamCompEntity;
     }
 

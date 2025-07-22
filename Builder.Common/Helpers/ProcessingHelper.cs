@@ -1,4 +1,5 @@
 using Builder.Common.Constants;
+using Builder.Common.Dtos.RiotApi;
 
 namespace Builder.Common.Helpers;
 
@@ -46,5 +47,18 @@ public class ProcessingHelper
         items.Sort();
         items = items.Select(x => CleanItemName(x)).ToList();
         return string.Join("-", items).Replace(" ", "").Replace("'", "");
+    }
+
+    public static string GetTeamHelperName(List<Unit> units)
+    {
+        var names = units.Select(x => CleanChampionName(x.character_id) != null ?
+            $"{CleanChampionName(x.character_id)}{x.tier}"
+            : null)
+            .Where(x => x != null)
+            .ToList()!;
+
+        names.Sort();
+
+        return string.Join("-", names);
     }
 }

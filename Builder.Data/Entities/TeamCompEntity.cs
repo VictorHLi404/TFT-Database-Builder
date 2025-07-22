@@ -12,6 +12,8 @@ public class TeamCompEntity
     [StringLength(64)]
     public string ContentHash { get; set; } = string.Empty;
 
+    public string? HelperName { get; set; }
+
     public decimal AveragePlacement { get; set; }
 
     public int TotalInstances { get; set; }
