@@ -3,10 +3,8 @@ using Builder.Common.Dtos.LambdaApi;
 using Builder.Data.Entities;
 using Builder.Common.Enums;
 using Builder.Common.Helpers;
-using Builder.Cli.Services;
 using Builder.LambdaApi.Helpers;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace Builder.LambdaApi.Services;
 

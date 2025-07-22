@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Builder.Cli\Builder.Cli.csproj" />
+    <ProjectReference Include="..\Builder.Common\Builder.Common.csproj" />
     <ProjectReference Include="..\Builder.Data\Builder.Data.csproj" />
   </ItemGroup>
 
