@@ -17,8 +17,14 @@ public class TeamService
         this.dbContext = dbContext;
     }
 
+    public IQueryable<ChampionEntity> ChampionBaseQuery() =>
+        dbContext.ChampionEntities;
+
     public IQueryable<TeamCompEntity> TeamCompBaseQuery() =>
         dbContext.TeamComps;
+
+    public IQueryable<TeamCompChampionJoinEntity> TeamCompChampionJoinBaseQuery() =>
+        dbContext.TeamCompChampions;
 
     public async Task<decimal?> GetTeamCompAveragePlacement(TeamRequest request)
     {
@@ -27,13 +33,39 @@ public class TeamService
         return teamComp?.AveragePlacement;
     }
 
-    public async Task<List<TeamCompEntity>> GetTeamCompAlternatives(TeamRequest initialTeam, List<ChampionRequest> alternativeChampions)
+    public async Task<List<List<ChampionEntity>>> GetTeamCompAlternatives(TeamRequest initialTeam, List<ChampionRequest> alternativeChampions)
     {
         int listLength = initialTeam.Level;
 
-        CombiationGenerator.GenerateListCombinationsWithDistance<ChampionRequest>(initialTeam.Champions, initialTeam.Champions, 2);
+        var alternativeTeamsBy2 = CombinationGenerator.GenerateListCombinationsWithDistance<ChampionRequest>(initialTeam.Champions, alternativeChampions, 2);
+        var alternativeTeamsBy1 = CombinationGenerator.GenerateListCombinationsWithDistance<ChampionRequest>(initialTeam.Champions, alternativeChampions, 1);
 
-        return [];
+        var alternativeTeamBy2Hashes = alternativeTeamsBy2.Select(x => CalculateTeamCompHash(x)).ToList();
+        var alternativeTeamsBy1Hashes = alternativeTeamsBy1.Select(x => CalculateTeamCompHash(x)).ToList();
+
+        var alternativeTeams = await TeamCompBaseQuery()
+            .Where(x => alternativeTeamBy2Hashes.Contains(x.ContentHash) || alternativeTeamsBy1Hashes.Contains(x.ContentHash))
+            .OrderBy(x => x.AveragePlacement)
+            .Take(5)
+            .ToListAsync();
+
+        List<List<ChampionEntity>> otherChampions = new List<List<ChampionEntity>>();
+
+        foreach (var alternativeTeam in alternativeTeams)
+        {
+            var alternativeTeamChampionsIds = await TeamCompChampionJoinBaseQuery()
+                .Where(x => x.TeamCompId == alternativeTeam.TeamCompId)
+                .Select(x => x.ChampionEntityId)
+                .ToListAsync();
+
+            var alternativeTeamChampions = await ChampionBaseQuery()
+                .Where(x => alternativeTeamChampionsIds.Contains(x.ChampionEntityId))
+                .ToListAsync();
+
+            otherChampions.Add(alternativeTeamChampions);
+        }
+
+        return otherChampions;
     }
 
     private string CalculateTeamCompHash(List<ChampionRequest> request)

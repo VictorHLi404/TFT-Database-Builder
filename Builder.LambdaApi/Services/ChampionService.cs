@@ -31,13 +31,13 @@ public class ChampionService
     public async Task<List<ChampionEntity>> GetSimilarWinrates(ChampionRequest originalChampion, List<ItemEnum> items)
     {
         int listLength = items.Count;
-        List<List<int>> subsetsOf2 = CombiationGenerator.GetSubsets(listLength, 2);
-        List<List<int>> subsetsOf3 = CombiationGenerator.GetSubsets(listLength, 3);
+        List<List<int>> subsetsOf2 = CombinationGenerator.GetSubsets(listLength, 2);
+        List<List<int>> subsetsOf3 = CombinationGenerator.GetSubsets(listLength, 3);
         List<List<string>> twoItemNames = subsetsOf2.Select(subset =>
                                         new List<string> {items[subset[0]].ToString(),
                                                             items[subset[1]].ToString() }
                                                             .OrderBy(s => s).ToList())
-                                        .ToList();
+                                                            .ToList();
         List<string> twoItemHashes = twoItemNames.Select(itemNames => CalculateChampionHash(originalChampion, itemNames)).ToList();
 
         var twoItemChampions = await ChampionBaseQuery().Where(t => twoItemHashes.Contains(t.ContentHash)).OrderBy(t => t.AveragePlacement).Take(5).ToListAsync();

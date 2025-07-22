@@ -8,7 +8,7 @@ To optimize, we either need to in the future:
 1. Do a lot of prevalidation to make sure we dont pass stupid combinations into the source list that were not going to be considered.
 2. Produce a hopefully better algorithm :(
 */
-public static class CombiationGenerator
+public static class CombinationGenerator
 {
     public static List<List<int>> GetSubsets(int listLength, int sublistLength)
     {
@@ -37,14 +37,46 @@ public static class CombiationGenerator
         {
             foreach (var indicesToSubstitute in GetSubsets(firstList.Count, i))
             {
-                List<T> currentCombination = new List<T>(firstList);
-                foreach (int index in indicesToSubstitute)
+                foreach (var indicesToUse in GetPermutationsWithRepetition<T>(secondList, i))
                 {
-                    currentCombination[index] = secondList[index];
+                    List<T> currentCombination = new List<T>(firstList);
+
+                    for (int k = 0; k < i; k++)
+                    {
+                        int indexInListA = indicesToSubstitute[k];
+                        T elementFromListB = indicesToUse[k];
+
+                        currentCombination[indexInListA] = elementFromListB;
+                    }
+                    
+                    allCombinations.Add(currentCombination);
                 }
-                allCombinations.Add(currentCombination);
             }
         }
         return allCombinations;
+    }
+
+    private static IEnumerable<List<T>> GetPermutationsWithRepetition<T>(List<T> sourceList, int count)
+    {
+        if (count == 0)
+        {
+            yield return new List<T>();
+            yield break;
+        }
+
+        if (sourceList == null || !sourceList.Any())
+        {
+            yield break;
+        }
+
+        foreach (var element in sourceList)
+        {
+            foreach (var subPermutation in GetPermutationsWithRepetition(sourceList, count - 1))
+            {
+                List<T> currentPermutation = new List<T> { element };
+                currentPermutation.AddRange(subPermutation);
+                yield return currentPermutation;
+            }
+        }
     }
 }
