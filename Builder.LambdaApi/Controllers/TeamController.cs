@@ -1,4 +1,5 @@
-using Builder.Common.Dtos.LambdaApi;
+using Builder.Common.Dtos.LambdaApi.Team;
+using Builder.Common.Dtos.LambdaApi.Champion;
 using Builder.LambdaApi.Services;
 using Microsoft.AspNetCore.Mvc;
 

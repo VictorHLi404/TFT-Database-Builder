@@ -1,5 +1,6 @@
 using Builder.Data;
-using Builder.Common.Dtos.LambdaApi;
+using Builder.Common.Dtos.LambdaApi.Team;
+using Builder.Common.Dtos.LambdaApi.Champion;
 using Builder.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Builder.Common.Helpers;

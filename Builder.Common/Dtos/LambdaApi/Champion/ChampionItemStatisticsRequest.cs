@@ -1,6 +1,6 @@
 using Builder.Common.Enums;
 
-namespace Builder.Common.Dtos.LambdaApi;
+namespace Builder.Common.Dtos.LambdaApi.Champion;
 
 public class ChampionItemStatisticsRequest
 {

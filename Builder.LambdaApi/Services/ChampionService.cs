@@ -1,5 +1,5 @@
 using Builder.Data;
-using Builder.Common.Dtos.LambdaApi;
+using Builder.Common.Dtos.LambdaApi.Champion;
 using Builder.Data.Entities;
 using Builder.Common.Enums;
 using Builder.Common.Helpers;

@@ -1,4 +1,4 @@
-using Builder.Common.Dtos.LambdaApi;
+using Builder.Common.Dtos.LambdaApi.Champion;
 using Builder.LambdaApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +18,7 @@ public class ChampionController : ControllerBase
         this.championService = championService;
     }
 
-    [HttpGet("ChampionWinrate", Name = "GetChampionAveragePlacement")]
+    [HttpPost("ChampionWinrate", Name = "GetChampionAveragePlacement")]
     public async Task<IActionResult> GetChampionAveragePlacement([FromBody] ChampionRequest champion)
     {
         return Ok(await championService.GetChampionAveragePlacement(champion));

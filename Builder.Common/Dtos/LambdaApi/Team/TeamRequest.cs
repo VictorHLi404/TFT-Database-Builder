@@ -1,4 +1,6 @@
-namespace Builder.Common.Dtos.LambdaApi;
+using Builder.Common.Dtos.LambdaApi.Champion;
+
+namespace Builder.Common.Dtos.LambdaApi.Team;
 
 public class TeamRequest
 {
