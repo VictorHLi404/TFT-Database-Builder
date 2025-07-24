@@ -5,5 +5,5 @@ namespace Builder.Common.Dtos.LambdaApi.Champion;
 public class ChampionItemStatisticsRequest
 {
     public required ChampionRequest MainChampion { get; set; }
-    public List<ItemEnum> items { get; set; } = [];
+    public List<List<ItemEnum>> PossibleItemSets { get; set; } = [];
 }

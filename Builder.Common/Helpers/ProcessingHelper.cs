@@ -1,5 +1,6 @@
 using Builder.Common.Constants;
 using Builder.Common.Dtos.RiotApi;
+using Builder.Common.Enums;
 
 namespace Builder.Common.Helpers;
 
@@ -47,6 +48,19 @@ public class ProcessingHelper
         items.Sort();
         items = items.Select(x => CleanItemName(x)).ToList();
         return string.Join("-", items).Replace(" ", "").Replace("'", "");
+    }
+
+    public static List<ItemEnum> GetItemEnums(string itemString)
+    {
+        var list = itemString.Split("-");
+        try
+        {
+            return list.Select(x => (ItemEnum)Enum.Parse(typeof(ItemEnum), x)).ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Failed to parse {itemString} into a list of ItemEnums: {ex.Message}");
+        }
     }
 
     public static string GetTeamHelperName(List<Unit> units)

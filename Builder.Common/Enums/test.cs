@@ -1,0 +1,22 @@
+public enum ItemEnum
+{
+    BFSword,
+    RecurveBow,
+    NeedlesslyLargeRod,
+    TearoftheGoddess,
+    GiantSlayer,
+    HextechGunblade,
+    SpearOfShojin,
+    RedBuff,
+    GuinsoosRageblade,
+    VoidStaff,
+    NashorsTooth,
+    RabadonsDeathcap,
+    ArchangelsStaff,
+    Morellonomicon,
+    JeweledGauntlet,
+    BlueBuff,
+    AdaptiveHelm,
+    StrikersFlail,
+    ThiefsGloves
+}
