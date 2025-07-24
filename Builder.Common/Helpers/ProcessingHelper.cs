@@ -52,15 +52,17 @@ public class ProcessingHelper
 
     public static List<ItemEnum> GetItemEnums(string itemString)
     {
-        var list = itemString.Split("-");
+        var list = itemString.Split("-").ToList();
+        if (list.Count <  1 || string.IsNullOrEmpty(itemString))
+            return [];
         try
-        {
-            return list.Select(x => (ItemEnum)Enum.Parse(typeof(ItemEnum), x)).ToList();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to parse {itemString} into a list of ItemEnums: {ex.Message}");
-        }
+            {
+                return list.Select(x => (ItemEnum)Enum.Parse(typeof(ItemEnum), x)).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to parse {itemString} into a list of ItemEnums: {ex.Message}");
+            }
     }
 
     public static string GetTeamHelperName(List<Unit> units)
