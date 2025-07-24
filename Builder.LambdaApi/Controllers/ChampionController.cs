@@ -20,10 +20,19 @@ public class ChampionController : ControllerBase
     }
 
     [HttpPost("ChampionWinrate", Name = "GetChampionAveragePlacement")]
-    [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ChampionResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetChampionAveragePlacement([FromBody] ChampionRequest champion)
     {
-        return Ok(await championService.GetChampionAveragePlacement(champion));
+        var result = await championService.GetChampionAveragePlacement(champion);
+        var response = result != null ? new ChampionResponse
+        {
+            ChampionName = result.Champion,
+            AveragePlacement = result.AveragePlacement,
+            Items = result.Items != null ? ProcessingHelper.GetItemEnums(result.Items) : [],
+            Level = result.ChampionLevel
+        } : null;
+        
+        return Ok(response);
     }
 
     [HttpPost("ChampionItems", Name = "GetChampionItems")]

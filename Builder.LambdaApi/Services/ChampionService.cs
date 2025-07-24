@@ -23,10 +23,10 @@ public class ChampionService
     public IQueryable<ChampionEntity> ChampionBaseQuery() =>
         dbContext.ChampionEntities;
 
-    public async Task<decimal> GetChampionAveragePlacement(ChampionRequest champion)
+    public async Task<ChampionEntity?> GetChampionAveragePlacement(ChampionRequest champion)
     {
         string contentHash = CalculateChampionHash(champion);
-        return await ChampionBaseQuery().Where(t => t.ContentHash == contentHash).Select(t => t.AveragePlacement).FirstOrDefaultAsync();
+        return await ChampionBaseQuery().Where(t => t.ContentHash == contentHash).FirstOrDefaultAsync();
     }
 
     public async Task<List<ChampionEntity>> GetSimilarWinrates(ChampionRequest originalChampion, List<List<ItemEnum>> possibleItemSets)
