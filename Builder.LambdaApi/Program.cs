@@ -37,6 +37,7 @@ builder.Services.AddDbContext<StatisticsDbContext>(options =>
     options.EnableSensitiveDataLogging();
 });
 
+builder.Services.AddScoped<BaseDataService>();
 builder.Services.AddScoped<ChampionService>();
 builder.Services.AddScoped<TeamService>();
 

@@ -11,30 +11,23 @@ namespace Builder.LambdaApi.Services;
 
 public class TeamService
 {
-    protected readonly StatisticsDbContext dbContext;
+    protected readonly BaseDataService dataService;
 
-    public TeamService(StatisticsDbContext dbContext)
+    public TeamService(BaseDataService dataService)
     {
-        this.dbContext = dbContext;
+        this.dataService = dataService;
     }
 
-    public IQueryable<ChampionEntity> ChampionBaseQuery() =>
-        dbContext.ChampionEntities;
-
-    public IQueryable<TeamCompEntity> TeamCompBaseQuery() =>
-        dbContext.TeamComps;
-
-    public IQueryable<TeamCompChampionJoinEntity> TeamCompChampionJoinBaseQuery() =>
-        dbContext.TeamCompChampions;
-
-    public async Task<decimal?> GetTeamCompAveragePlacement(TeamRequest request)
+    public async Task<(decimal placement, List<WeakChampionEntity> champions)> GetTeamCompAveragePlacement(TeamRequest request)
     {
         var hash = CalculateTeamCompHash(request.Champions);
-        var teamComp = await TeamCompBaseQuery().Where(x => x.ContentHash == hash).FirstOrDefaultAsync();
-        return teamComp?.AveragePlacement;
+        var teamComp = await dataService.TeamCompBaseQuery().Where(x => x.ContentHash == hash).FirstOrDefaultAsync();
+        if (teamComp == null)
+            return (0, []);
+        return await GetWeakChampions(teamComp);
     }
 
-    public async Task<List<List<ChampionEntity>>> GetTeamCompAlternatives(TeamRequest initialTeam, List<ChampionRequest> alternativeChampions)
+    public async Task<List<(decimal placement, List<WeakChampionEntity> champions)>> GetTeamCompAlternatives(TeamRequest initialTeam, List<ChampionRequest> alternativeChampions)
     {
         int listLength = initialTeam.Level;
 
@@ -44,29 +37,28 @@ public class TeamService
         var alternativeTeamBy2Hashes = alternativeTeamsBy2.Select(x => CalculateTeamCompHash(x)).ToList();
         var alternativeTeamsBy1Hashes = alternativeTeamsBy1.Select(x => CalculateTeamCompHash(x)).ToList();
 
-        var alternativeTeams = await TeamCompBaseQuery()
+        var alternativeTeams = await dataService.TeamCompBaseQuery()
             .Where(x => alternativeTeamBy2Hashes.Contains(x.ContentHash) || alternativeTeamsBy1Hashes.Contains(x.ContentHash))
             .OrderBy(x => x.AveragePlacement)
             .Take(5)
             .ToListAsync();
 
-        List<List<ChampionEntity>> otherChampions = new List<List<ChampionEntity>>();
+
+        var alternativeTeamDetails = new List<(decimal placement, List<WeakChampionEntity> champions)>();
 
         foreach (var alternativeTeam in alternativeTeams)
         {
-            var alternativeTeamChampionsIds = await TeamCompChampionJoinBaseQuery()
-                .Where(x => x.TeamCompId == alternativeTeam.TeamCompId)
-                .Select(x => x.ChampionEntityId)
-                .ToListAsync();
-
-            var alternativeTeamChampions = await ChampionBaseQuery()
-                .Where(x => alternativeTeamChampionsIds.Contains(x.ChampionEntityId))
-                .ToListAsync();
-
-            otherChampions.Add(alternativeTeamChampions);
+            alternativeTeamDetails.Add(await GetWeakChampions(alternativeTeam));
         }
 
-        return otherChampions;
+        return alternativeTeamDetails;
+    }
+
+    public async Task<(decimal placement, List<WeakChampionEntity> champions)> GetWeakChampions(TeamCompEntity teamComp)
+    {
+        var hashList = teamComp.ChampionHashes!.ToList();
+        var champions = await dataService.WeakChampionBaseQuery().Where(x => hashList.Contains(x.ContentHash)).ToListAsync();
+        return (teamComp.AveragePlacement, champions);
     }
 
     private string CalculateTeamCompHash(List<ChampionRequest> request)

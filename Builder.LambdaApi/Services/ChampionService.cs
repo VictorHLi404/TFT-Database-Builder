@@ -10,20 +10,17 @@ namespace Builder.LambdaApi.Services;
 
 public class ChampionService
 {
-    protected readonly StatisticsDbContext dbContext;
+    protected readonly BaseDataService dataService;
 
-    public ChampionService(StatisticsDbContext dbContext)
+    public ChampionService(BaseDataService dataService)
     {
-        this.dbContext = dbContext;
+        this.dataService = dataService;
     }
-
-    public IQueryable<ChampionEntity> ChampionBaseQuery() =>
-        dbContext.ChampionEntities;
 
     public async Task<ChampionEntity?> GetChampionAveragePlacement(ChampionRequest champion)
     {
         string contentHash = CalculateChampionHash(champion);
-        return await ChampionBaseQuery().Where(t => t.ContentHash == contentHash).FirstOrDefaultAsync();
+        return await dataService.ChampionBaseQuery().Where(t => t.ContentHash == contentHash).FirstOrDefaultAsync();
     }
 
     public async Task<List<ChampionEntity>> GetSimilarWinrates(ChampionRequest originalChampion, List<List<ItemEnum>> possibleItemSets)
@@ -46,7 +43,7 @@ public class ChampionService
             hashes = hashes.Distinct().ToList();
         }
 
-        var champions = await ChampionBaseQuery().Where(t => hashes.Contains(t.ContentHash) && t.TotalInstances >= ConstantValues.MINIMUM_GAMES_PLAYED)
+        var champions = await dataService.ChampionBaseQuery().Where(t => hashes.Contains(t.ContentHash) && t.TotalInstances >= ConstantValues.MINIMUM_GAMES_PLAYED)
                         .OrderBy(t => t.AveragePlacement)
                         .Take(5)
                         .ToListAsync();
