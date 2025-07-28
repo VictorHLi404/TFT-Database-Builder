@@ -1,12 +1,9 @@
 using Builder.Data;
 using Builder.Common.Dtos.LambdaApi.Champion;
 using Builder.Data.Entities;
-using Builder.Common.Enums;
 using Builder.Common.Helpers;
 using Builder.LambdaApi.Helpers;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography.X509Certificates;
-using System.Net;
 using Builder.Common.Constants;
 
 namespace Builder.LambdaApi.Services;

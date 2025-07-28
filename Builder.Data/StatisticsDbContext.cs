@@ -10,6 +10,7 @@ public class StatisticsDbContext : DbContext
     public DbSet<TeamCompEntity> TeamComps { get; set; }
     public DbSet<ChampionEntity> ChampionEntities { get; set; }
     public DbSet<TeamCompChampionJoinEntity> TeamCompChampions { get; set; }
+    public DbSet<WeakChampionEntity> WeakChampionEntities { get; set; }
 
     public StatisticsDbContext(DbContextOptions<StatisticsDbContext> options) : base(options)
     {
@@ -20,6 +21,7 @@ public class StatisticsDbContext : DbContext
         ConfigureTeamComp(modelBuilder.Entity<TeamCompEntity>());
         ConfigureChampionEntity(modelBuilder.Entity<ChampionEntity>());
         ConfigureTeamCompChampions(modelBuilder.Entity<TeamCompChampionJoinEntity>());
+        ConfigureWeakChampionEntity(modelBuilder.Entity<WeakChampionEntity>());
         base.OnModelCreating(modelBuilder);
     }
     private static void ConfigureTeamComp(EntityTypeBuilder<TeamCompEntity> entity)
@@ -46,6 +48,14 @@ public class StatisticsDbContext : DbContext
         entity.HasOne(tcc => tcc.Champion)          // A JoinEntity record has one ChampionData
             .WithMany(cd => cd.Team)     // A ChampionData has many JoinEntity records
             .HasForeignKey(tcc => tcc.ChampionEntityId); // The foreign key is Champion
+    }
+
+    private static void ConfigureWeakChampionEntity(EntityTypeBuilder<WeakChampionEntity> entity)
+    {
+        entity.Property(t => t.Champion)
+            .HasConversion<string>();
+        entity.HasIndex(t => t.ContentHash)
+            .IsUnique();
     }
 
 
