@@ -6,6 +6,7 @@ using Builder.Data;
 using Builder.Cli.Services;
 using Builder.Common.Dtos.RiotApi;
 using Npgsql;
+using Builder.Data.Entities;
 
 namespace Builder.Cli
 {
@@ -91,6 +92,7 @@ namespace Builder.Cli
                 throw new Exception("Could not find initial PUUID.");
             }
             HashSet<string> visitedMatchIds = new HashSet<string>();
+            Dictionary<string, WeakChampionEntity> weakChampionTable = await dataService.GetWeakChampionMapping();
             Queue<string> matchBFSQueue = new Queue<string>();
             await addMatchesToQueue(initialPUUID, matchIDRequestService, matchBFSQueue, visitedMatchIds);
             int gamesChecked = 0;
@@ -104,7 +106,7 @@ namespace Builder.Cli
                     Console.WriteLine("FOUND A NON-RANKED GAME");
                     continue;
                 }
-                await dataService.AddMatch(currentMatch);
+                await dataService.AddMatch(currentMatch, weakChampionTable);
 
                 List<Participant> participants = currentMatch.info.participants;
                 List<string> newPUUIDs = new List<string>();

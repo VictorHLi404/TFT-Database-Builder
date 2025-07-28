@@ -9,6 +9,7 @@ using Builder.Common.Enums;
 using Builder.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Builder.Common.Models.Hashes;
+using System.Xml.Schema;
 
 namespace Builder.Cli.Services;
 
@@ -29,20 +30,14 @@ public class DataService
     public IQueryable<TeamCompChampionJoinEntity> TeamCompChampionJoinBaseQuery() =>
         dbContext.TeamCompChampions;
 
-    public Task UpdateChampionEntity(ChampionEntity championEntity)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task UpdateTeamComp(TeamCompEntity teamCompEntity)
-    {
-        return Task.CompletedTask;
-    }
+    public IQueryable<WeakChampionEntity> WeakChampionBaseQuery() =>
+        dbContext.WeakChampionEntities;
 
     public async Task<ChampionEntity?> AddChampionEntity(
         Unit championDto,
         int newPlacement,
-        Dictionary<string, ChampionEntity> existingChampionEntities)
+        Dictionary<string, ChampionEntity> existingChampionEntities,
+        Dictionary<string, WeakChampionEntity> weakChampionTable)
     {
         var cleanedChampionName = ProcessingHelper.CleanChampionName(championDto.character_id);
         if (cleanedChampionName == null)
@@ -54,6 +49,24 @@ public class DataService
         if (!ChampionEnum.TryParse(cleanedChampionName, true, out champion))
         {
             throw new Exception($"Failed to parse {cleanedChampionName}");
+        }
+
+        string weakHash = CalculateWeakChampionHash(championDto);
+        if (weakChampionTable.ContainsKey(weakHash))
+            UpdateWeakChampionStatistics(weakChampionTable[weakHash], newPlacement);
+        else
+        {
+            var newWeakChampionEntity = new WeakChampionEntity
+            {
+                WeakChampionEntityId = Guid.NewGuid(),
+                Champion = champion,
+                ChampionLevel = championDto.tier,
+                AveragePlacement = newPlacement,
+                TotalInstances = 1,
+                ContentHash = weakHash
+            };
+            await dbContext.WeakChampionEntities.AddAsync(newWeakChampionEntity);
+            weakChampionTable.Add(weakHash, newWeakChampionEntity);
         }
 
         string hash = CalculateChampionHash(championDto);
@@ -83,6 +96,12 @@ public class DataService
             existingChampionEntities.Add(hash, newChampionEntity);
             return newChampionEntity;
         }
+    }
+
+    public async Task<Dictionary<string, WeakChampionEntity>> GetWeakChampionMapping()
+    {
+        var dictionary = await WeakChampionBaseQuery().ToDictionaryAsync(x => x.ContentHash, x => x);
+        return dictionary ?? new Dictionary<string, WeakChampionEntity>();
     }
 
     public async Task<TeamCompEntity> AddTeamComp(
@@ -132,7 +151,7 @@ public class DataService
         }
     }
 
-    public async Task AddMatch(Match match)
+    public async Task AddMatch(Match match, Dictionary<string, WeakChampionEntity> weakChampionTable)
     {
         var currentMatchChampionHashes = new HashSet<string>();
         var currentMatchTeamCompHashes = new HashSet<string>();
@@ -162,7 +181,7 @@ public class DataService
             List<ChampionEntity> champions = new List<ChampionEntity>();
             foreach (Unit unit in participant.units)
             {
-                ChampionEntity? championEntity = await AddChampionEntity(unit, participant.placement, existingChampionEntities);
+                ChampionEntity? championEntity = await AddChampionEntity(unit, participant.placement, existingChampionEntities, weakChampionTable);
                 if (championEntity != null)
                 {
                     champions.Add(championEntity);
@@ -193,8 +212,6 @@ public class DataService
         {
             if (!existingJoinSet.Contains((teamCompId, championId)))
             {
-                // Find the actual entities from the context's change tracker or existing dictionaries
-                // This is important for EF Core to correctly set up the relationships for new joins
                 var teamComp = dbContext.TeamComps.Local.FirstOrDefault(tc => tc.TeamCompId == teamCompId)
                                ?? existingTeamCompEntities.Values.FirstOrDefault(tc => tc.TeamCompId == teamCompId);
 
@@ -281,5 +298,14 @@ public class DataService
         championEntity.AveragePlacement = newAveragePlacement;
         championEntity.TotalInstances = championEntity.TotalInstances + 1;
         return championEntity;
+    }
+
+    private WeakChampionEntity UpdateWeakChampionStatistics(WeakChampionEntity weakChampionEntity, int newPlacement)
+    {
+        decimal formerAveragePlacement = weakChampionEntity.AveragePlacement;
+        decimal newAveragePlacement = ((formerAveragePlacement * weakChampionEntity.TotalInstances) + newPlacement) / (weakChampionEntity.TotalInstances + 1);
+        weakChampionEntity.AveragePlacement = newAveragePlacement;
+        weakChampionEntity.TotalInstances = weakChampionEntity.TotalInstances + 1;
+        return weakChampionEntity;
     }
 }
