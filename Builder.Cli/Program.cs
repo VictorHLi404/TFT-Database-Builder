@@ -97,8 +97,7 @@ namespace Builder.Cli
             Queue<string> matchBFSQueue = new Queue<string>();
             await addMatchesToQueue(initialPUUID, matchIDRequestService, matchBFSQueue, visitedMatchIds);
             int gamesChecked = 0;
-            int maxSize = 20000;
-            while (gamesChecked < maxSize)
+            while (gamesChecked < ConfigurationHelper.MaxGames)
             {
                 string currentMatchId = matchBFSQueue.Dequeue();
                 Match currentMatch = await matchDataRequestService.GetMatchData(currentMatchId) ?? throw new Exception($"Could not get match data for match Id {currentMatchId}");
@@ -133,7 +132,7 @@ namespace Builder.Cli
             Queue<string> matchBFSQueue,
             HashSet<string> visitedMatchIds)
         {
-            if (matchBFSQueue.Count > 100)
+            if (matchBFSQueue.Count > ConfigurationHelper.BFSQueueMaxSize)
             {
                 return;
             }
