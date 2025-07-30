@@ -6,20 +6,22 @@ using Builder.Data;
 using Npgsql;
 using Builder.LambdaApi.Services;
 using System.Text.Json.Serialization;
+using Builder.LambdaApi.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
-// Add services to the container.
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Configuration.AddUserSecrets<Program>();
+
+ConfigurationHelper.Initialize(builder.Configuration);
 
 builder.Services.AddDbContext<StatisticsDbContext>(options =>
 {

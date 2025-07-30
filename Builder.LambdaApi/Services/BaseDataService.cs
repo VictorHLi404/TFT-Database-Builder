@@ -4,7 +4,6 @@ using Builder.Data.Entities;
 using Builder.Common.Helpers;
 using Builder.LambdaApi.Helpers;
 using Microsoft.EntityFrameworkCore;
-using Builder.Common.Constants;
 
 namespace Builder.LambdaApi.Services;
 

@@ -1,6 +1,4 @@
-using Builder.Common.Constants;
 using Builder.Common.Dtos.RiotApi;
-using Builder.Common.Enums;
 
 namespace Builder.Common.Helpers;
 
@@ -28,25 +26,25 @@ public class ProcessingHelper
         return newName;
     }
 
-    public static string CleanItemName(string itemName)
+    public static string CleanItemName(string itemName, int currentSetNumber) // fix this later
     {
         // janky as hell, replace with a regex eventually
         var cleanedItemName = itemName.Replace("TFT_Item_", "");
         // janky as hell, replace with a regex eventually
-        for (int i = 1; i <= ConstantValues.TFT_SET_NUMBER; i++)
+        for (int i = 1; i <= currentSetNumber; i++)
             cleanedItemName = cleanedItemName.Replace($"TFT{i}_Item_", "");
 
         cleanedItemName = cleanedItemName.Replace("TFT_", "");
-        for (int i = 1; i <= ConstantValues.TFT_SET_NUMBER; i++)
+        for (int i = 1; i <= currentSetNumber; i++)
             cleanedItemName = cleanedItemName.Replace($"TFT{i}_", "");
 
         return cleanedItemName;
     }
 
-    public static string GetItemString(List<string> items)
+    public static string GetItemString(List<string> items, int currentSetNumber)
     {
         items.Sort();
-        items = items.Select(x => CleanItemName(x)).ToList();
+        items = items.Select(x => CleanItemName(x, currentSetNumber)).ToList();
         return string.Join("-", items).Replace(" ", "").Replace("'", "");
     }
 

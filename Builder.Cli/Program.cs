@@ -7,6 +7,7 @@ using Builder.Cli.Services;
 using Builder.Common.Dtos.RiotApi;
 using Npgsql;
 using Builder.Data.Entities;
+using Builder.Cli.Helpers;
 
 namespace Builder.Cli
 {
@@ -30,7 +31,7 @@ namespace Builder.Cli
 
                     var configuration = services.GetRequiredService<IConfiguration>();
                     var apiKey = configuration["ApiKeys:RiotApiKey"];
-
+                    ConfigurationHelper.Initialize(configuration);
 
                     var dataService = services.GetRequiredService<DataService>();
                     var matchIDRequestService = services.GetRequiredService<MatchIDRequestService>();
@@ -101,7 +102,7 @@ namespace Builder.Cli
             {
                 string currentMatchId = matchBFSQueue.Dequeue();
                 Match currentMatch = await matchDataRequestService.GetMatchData(currentMatchId) ?? throw new Exception($"Could not get match data for match Id {currentMatchId}");
-                if (currentMatch.info.tft_game_type != "standard" || currentMatch.info.tft_set_number != 14 || currentMatch.info.queue_id != 1100)
+                if (!ValidateMatchType(currentMatch))
                 {
                     Console.WriteLine("FOUND A NON-RANKED GAME");
                     continue;
@@ -121,7 +122,7 @@ namespace Builder.Cli
                 {
                     await addMatchesToQueue(puuid, matchIDRequestService, matchBFSQueue, visitedMatchIds);
                 }
-                await Task.Delay(5000);
+                await Task.Delay(ConfigurationHelper.RequestTimeout);
                 gamesChecked++;
             }
         }
@@ -146,6 +147,13 @@ namespace Builder.Cli
                 }
             }
             return;
+        }
+
+        private static bool ValidateMatchType(Match currentMatch)
+        {
+            return currentMatch.info.tft_game_type == ConfigurationHelper.GameType &&
+            currentMatch.info.tft_set_number == ConfigurationHelper.SetNumber &&
+            currentMatch.info.queue_id == ConfigurationHelper.QueueId;
         }
     }
 }

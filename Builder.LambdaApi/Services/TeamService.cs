@@ -54,10 +54,14 @@ public class TeamService
         return alternativeTeamDetails;
     }
 
-    public async Task<(decimal placement, List<WeakChampionEntity> champions)> GetPopularTeamComp()
+    public async Task<(decimal placement, List<WeakChampionEntity> champions)> GetPopularTeamComp(PopularTeamCompRequest request)
     {
         var teamComps = await dataService.TeamCompBaseQuery()
-            .OrderByDescending(x => x.TotalInstances).Take(200)
+            .OrderByDescending(x => x.TotalInstances)
+            .Where(x => !string.IsNullOrEmpty(x.HelperName) &&
+            (x.HelperName.Length - x.HelperName.Replace("-", "").Length) + 1 == request.Level && // this is really bad as well, should look into introducing a team size column
+            x.TotalInstances > ConfigurationHelper.MinimumInstanceCount)
+            .Take(200)
             .AsNoTracking()
             .ToListAsync();
 
@@ -78,7 +82,7 @@ public class TeamService
     private string CalculateTeamCompHash(List<ChampionRequest> request)
     {
         var sortedChampions = request.OrderBy(t => t.ChampionName.ToString())
-            .ThenBy(t => ProcessingHelper.GetItemString(t.Items.Select(x => x.ToString()).ToList()))
+            .ThenBy(t => ProcessingHelper.GetItemString(t.Items.Select(x => x.ToString()).ToList(), ConfigurationHelper.SetNumber))
             .Where(t => ProcessingHelper.CleanChampionName(t.ChampionName.ToString()) != null)
             .ToList();
 

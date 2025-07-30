@@ -10,6 +10,7 @@ using Builder.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Builder.Common.Models.Hashes;
 using System.Xml.Schema;
+using Builder.Cli.Helpers;
 
 namespace Builder.Cli.Services;
 
@@ -44,7 +45,7 @@ public class DataService
         {
             return null;
         }
-        string itemNames = ProcessingHelper.GetItemString(championDto.itemNames);
+        string itemNames = ProcessingHelper.GetItemString(championDto.itemNames, ConfigurationHelper.SetNumber);
         ChampionEnum champion;
         if (!ChampionEnum.TryParse(cleanedChampionName, true, out champion))
         {
@@ -244,7 +245,7 @@ public class DataService
         return HashHelper.CalculateChampionHash(new()
         {
             ChampionName = ProcessingHelper.CleanChampionName(champion.character_id) ?? throw new Exception("Cannot calculate champion hash of an invalid champion"),
-            Items = ProcessingHelper.GetItemString(champion.itemNames),
+            Items = ProcessingHelper.GetItemString(champion.itemNames, ConfigurationHelper.SetNumber),
             Level = champion.tier
         });
     }
@@ -263,7 +264,7 @@ public class DataService
         var sortedChampions = participantDtos.units
             .Where(t => ProcessingHelper.CleanChampionName(t.character_id) != null)
             .OrderBy(t => ProcessingHelper.CleanChampionName(t.character_id))
-            .ThenBy(t => ProcessingHelper.GetItemString(t.itemNames))
+            .ThenBy(t => ProcessingHelper.GetItemString(t.itemNames, ConfigurationHelper.SetNumber))
             .ToList();
 
         var championHashRequests = sortedChampions.Select(x => new WeakChampionHashCreateModel

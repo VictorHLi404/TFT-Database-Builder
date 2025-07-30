@@ -63,10 +63,10 @@ public class TeamController : ControllerBase
 
     [HttpPost("PopularTeamComp", Name = "GetPopularTeamComp")]
     [ProducesResponseType(typeof(TeamResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetPopularTeamComp()
+    public async Task<IActionResult> GetPopularTeamComp([FromBody] PopularTeamCompRequest request)
     {
-        // this method should really be a GET, but i dont want to configure that on the api client end.
-        var results = await teamService.GetPopularTeamComp();
+        // this method should really be a GET, but i dont want to configure that on the api client end yet.
+        var results = await teamService.GetPopularTeamComp(request);
 
         var response = new TeamResponse
         {

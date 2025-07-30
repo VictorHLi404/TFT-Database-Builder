@@ -4,7 +4,6 @@ using Builder.Data.Entities;
 using Builder.Common.Helpers;
 using Builder.LambdaApi.Helpers;
 using Microsoft.EntityFrameworkCore;
-using Builder.Common.Constants;
 
 namespace Builder.LambdaApi.Services;
 
@@ -43,7 +42,7 @@ public class ChampionService
             hashes = hashes.Distinct().ToList();
         }
 
-        var champions = await dataService.ChampionBaseQuery().Where(t => hashes.Contains(t.ContentHash) && t.TotalInstances >= ConstantValues.MINIMUM_GAMES_PLAYED)
+        var champions = await dataService.ChampionBaseQuery().Where(t => hashes.Contains(t.ContentHash) && t.TotalInstances >= ConfigurationHelper.MinimumInstanceCount)
                         .OrderBy(t => t.AveragePlacement)
                         .Take(5)
                         .ToListAsync();
@@ -56,7 +55,7 @@ public class ChampionService
         return HashHelper.CalculateChampionHash(new()
         {
             ChampionName = ProcessingHelper.CleanChampionName(champion.ChampionName.ToString()) ?? throw new Exception("Could not parse the champion name provided"),
-            Items = ProcessingHelper.GetItemString(items),
+            Items = ProcessingHelper.GetItemString(items, ConfigurationHelper.SetNumber),
             Level = champion.Level
         });
     }
@@ -66,7 +65,7 @@ public class ChampionService
         return HashHelper.CalculateChampionHash(new()
         {
             ChampionName = ProcessingHelper.CleanChampionName(champion.ChampionName.ToString()) ?? throw new Exception("Could not parse the champion name provided"),
-            Items = ProcessingHelper.GetItemString(champion.Items.Select(x => x.ToString()).ToList()),
+            Items = ProcessingHelper.GetItemString(champion.Items.Select(x => x.ToString()).ToList(), ConfigurationHelper.SetNumber),
             Level = champion.Level
         });
     }
