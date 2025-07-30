@@ -54,6 +54,20 @@ public class TeamService
         return alternativeTeamDetails;
     }
 
+    public async Task<(decimal placement, List<WeakChampionEntity> champions)> GetPopularTeamComp()
+    {
+        var teamComps = await dataService.TeamCompBaseQuery()
+            .OrderByDescending(x => x.TotalInstances).Take(200)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var random = new Random();
+        int randomIndex = random.Next(0, teamComps.Count);
+        return await GetWeakChampions(teamComps[randomIndex]);
+    }
+
+
+
     public async Task<(decimal placement, List<WeakChampionEntity> champions)> GetWeakChampions(TeamCompEntity teamComp)
     {
         var hashList = teamComp.ChampionHashes!.ToList();

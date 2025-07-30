@@ -19,7 +19,7 @@ public class TeamController : ControllerBase
         this.teamService = teamService;
     }
 
-    [HttpGet("TeamWinrate", Name = "GetTeamAveragePlacement")]
+    [HttpPost("TeamWinrate", Name = "GetTeamAveragePlacement")]
     [ProducesResponseType(typeof(TeamResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTeamAveragePlacement([FromBody] TeamRequest request)
     {
@@ -40,7 +40,7 @@ public class TeamController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("TeamAlternativeComps", Name = "GetTeamAlternativeCompWinrates")]
+    [HttpPost("TeamAlternativeComps", Name = "GetTeamAlternativeCompWinrates")]
     [ProducesResponseType(typeof(List<TeamResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTeamAlternativeCompWinrates([FromBody] TeamAlternativeStatisticsRequest request)
     {
@@ -57,6 +57,28 @@ public class TeamController : ControllerBase
                 Items = []
             }).ToList()
         }).ToList();
+
+        return Ok(response);
+    }
+
+    [HttpPost("PopularTeamComp", Name = "GetPopularTeamComp")]
+    [ProducesResponseType(typeof(TeamResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPopularTeamComp()
+    {
+        // this method should really be a GET, but i dont want to configure that on the api client end.
+        var results = await teamService.GetPopularTeamComp();
+
+        var response = new TeamResponse
+        {
+            AveragePlacement = results.placement,
+            Champions = results.champions.Select(x => new ChampionResponse
+            {
+                AveragePlacement = x.AveragePlacement,
+                ChampionName = x.Champion,
+                Level = x.ChampionLevel,
+                Items = []
+            }).ToList()
+        };
 
         return Ok(response);
     }
