@@ -1,5 +1,6 @@
 using Builder.Data;
 using Builder.Common.Dtos.LambdaApi.Champion;
+using Builder.Common.Enums;
 using Builder.Data.Entities;
 using Builder.Common.Helpers;
 using Builder.LambdaApi.Helpers;
@@ -54,8 +55,8 @@ public class ChampionService
     {
         return HashHelper.CalculateChampionHash(new()
         {
-            ChampionName = ProcessingHelper.CleanChampionName(champion.ChampionName.ToString()) ?? throw new Exception("Could not parse the champion name provided"),
-            Items = ProcessingHelper.GetItemString(items, ConfigurationHelper.SetNumber),
+            ChampionName = champion.ChampionName.ToString(),
+            Items = ProcessingHelper.GetItemString(items),
             Level = champion.Level
         });
     }
@@ -64,8 +65,8 @@ public class ChampionService
     {
         return HashHelper.CalculateChampionHash(new()
         {
-            ChampionName = ProcessingHelper.CleanChampionName(champion.ChampionName.ToString()) ?? throw new Exception("Could not parse the champion name provided"),
-            Items = ProcessingHelper.GetItemString(champion.Items.Select(x => x.ToString()).ToList(), ConfigurationHelper.SetNumber),
+            ChampionName = champion.ChampionName.ToString(),
+            Items = ProcessingHelper.GetItemString(champion.Items.Select(x => x.ToString()).ToList()),
             Level = champion.Level
         });
     }

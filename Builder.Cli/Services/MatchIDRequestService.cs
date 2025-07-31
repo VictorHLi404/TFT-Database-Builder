@@ -1,8 +1,4 @@
 using System.Net.Http.Json;
-using Builder.Common.Dtos.RiotApi;
-using Builder.Data;
-using Builder.Data.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Builder.Cli.Services;

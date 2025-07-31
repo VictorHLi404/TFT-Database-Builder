@@ -1,30 +1,31 @@
 using Builder.Common.Dtos.RiotApi;
+using Builder.Common.Enums;
 
 namespace Builder.Common.Helpers;
 
 public class ProcessingHelper
 {
+    public static bool DoesChampionExist(string championId)
+        => DataDragonProcessingHelper.Instance!.ChampionMapping.ContainsKey(championId);
+
+    public static ChampionEnum GetChampionEnum(string championId)
+        => DataDragonProcessingHelper.Instance!.ChampionMapping.ContainsKey(championId) ?
+        DataDragonProcessingHelper.Instance!.ChampionMapping[championId] :
+        throw new Exception("Cannot get a champion enum of a champion that does not exist.");
+
+    public static bool DoesItemExist(string itemId)
+        => DataDragonProcessingHelper.Instance!.ItemMapping.ContainsKey(itemId);
+
+    public static ItemEnum GetItemEnum(string itemId)
+        => DataDragonProcessingHelper.Instance!.ItemMapping.ContainsKey(itemId) ?
+        DataDragonProcessingHelper.Instance!.ItemMapping[itemId] :
+        throw new Exception("Cannot get a item enum of an item that does not exist.");
+
     public static string? CleanChampionName(string championName)
-    {
-        string newName = championName.Replace("TFT14_", "").Replace(" ", "").Replace("'", "");
-        if (newName.Contains("Summon"))
-        {
-            return null;
-        }
-        else if (newName.Contains("TFTEvent"))
-        {
-            return null;
-        }
-        if (newName.Contains("NidaleeCougar"))
-        {
-            newName = newName.Replace("NidaleeCougar", "Nidalee");
-        }
-        else if (newName.Contains("Jarvan"))
-        {
-            newName = newName.Replace("Jarvan", "JarvanIV");
-        }
-        return newName;
-    }
+        => championName.Replace(" ", "").Replace("'", "").Replace(".", "");
+
+    public static string? CleanItemName(string itemName)
+        => itemName.Replace(" ", "").Replace("'", "").Replace(".", "");
 
     public static string CleanItemName(string itemName, int currentSetNumber) // fix this later
     {
@@ -41,12 +42,21 @@ public class ProcessingHelper
         return cleanedItemName;
     }
 
-    public static string GetItemString(List<string> items, int currentSetNumber)
+    public static string GetItemString(List<string> items)
     {
-        items.Sort();
-        items = items.Select(x => CleanItemName(x, currentSetNumber)).ToList();
-        return string.Join("-", items).Replace(" ", "").Replace("'", "");
+        if (items.Any(x => !DoesItemExist(x)))
+            return "";
+        var cleanedItems = items.Select(x => GetItemEnum(x).ToString()).ToList();
+        cleanedItems.Sort();
+        return string.Join("-", cleanedItems).Replace(" ", "").Replace("'", "");
     }
+
+    // public static string GetItemString(List<string> items, int currentSetNumber)
+    // {
+    //     items.Sort();
+    //     items = items.Select(x => CleanItemName(x, currentSetNumber)).ToList();
+    //     return string.Join("-", items).Replace(" ", "").Replace("'", "");
+    // }
 
     public static List<ItemEnum> GetItemEnums(string itemString)
     {
@@ -65,8 +75,8 @@ public class ProcessingHelper
 
     public static string GetTeamHelperName(List<Unit> units)
     {
-        var names = units.Select(x => CleanChampionName(x.character_id) != null ?
-            $"{CleanChampionName(x.character_id)}{x.tier}"
+        var names = units.Select(x => DoesChampionExist(x.character_id) ?
+            $"{GetChampionEnum(x.character_id)}{x.tier}"
             : null)
             .Where(x => x != null)
             .ToList()!;

@@ -22,6 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Configuration.AddUserSecrets<Program>();
 
 ConfigurationHelper.Initialize(builder.Configuration);
+DataDragonProcessingHelper.Initialize(ConfigurationHelper.SetNumber);
 
 builder.Services.AddDbContext<StatisticsDbContext>(options =>
 {

@@ -82,7 +82,7 @@ public class TeamService
     private string CalculateTeamCompHash(List<ChampionRequest> request)
     {
         var sortedChampions = request.OrderBy(t => t.ChampionName.ToString())
-            .ThenBy(t => ProcessingHelper.GetItemString(t.Items.Select(x => x.ToString()).ToList(), ConfigurationHelper.SetNumber))
+            .ThenBy(t => ProcessingHelper.GetItemString(t.Items.Select(x => x.ToString()).ToList()))
             .Where(t => ProcessingHelper.CleanChampionName(t.ChampionName.ToString()) != null)
             .ToList();
 

@@ -32,6 +32,7 @@ namespace Builder.Cli
                     var configuration = services.GetRequiredService<IConfiguration>();
                     var apiKey = configuration["ApiKeys:RiotApiKey"];
                     ConfigurationHelper.Initialize(configuration);
+                    DataDragonProcessingHelper.Initialize(ConfigurationHelper.SetNumber);
 
                     var dataService = services.GetRequiredService<DataService>();
                     var matchIDRequestService = services.GetRequiredService<MatchIDRequestService>();
@@ -87,7 +88,7 @@ namespace Builder.Cli
             MatchDataRequestService matchDataRequestService,
             MatchIDRequestService matchIDRequestService)
         {
-            var initialPUUID = configuration["ApiKeys:InitialPUUID"];
+            var initialPUUID = ConfigurationHelper.InitialPUUID;
             if (initialPUUID == null)
             {
                 throw new Exception("Could not find initial PUUID.");

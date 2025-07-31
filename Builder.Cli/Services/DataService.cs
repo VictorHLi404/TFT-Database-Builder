@@ -1,7 +1,3 @@
-using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
 using Builder.Common.Dtos.RiotApi;
 using Builder.Data;
 using Builder.Data.Entities;
@@ -9,7 +5,6 @@ using Builder.Common.Enums;
 using Builder.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Builder.Common.Models.Hashes;
-using System.Xml.Schema;
 using Builder.Cli.Helpers;
 
 namespace Builder.Cli.Services;
@@ -40,16 +35,16 @@ public class DataService
         Dictionary<string, ChampionEntity> existingChampionEntities,
         Dictionary<string, WeakChampionEntity> weakChampionTable)
     {
-        var cleanedChampionName = ProcessingHelper.CleanChampionName(championDto.character_id);
-        if (cleanedChampionName == null)
-        {
+        if (!DataDragonProcessingHelper.Instance!.ChampionMapping.ContainsKey(championDto.character_id))
             return null;
-        }
-        string itemNames = ProcessingHelper.GetItemString(championDto.itemNames, ConfigurationHelper.SetNumber);
-        ChampionEnum champion;
-        if (!ChampionEnum.TryParse(cleanedChampionName, true, out champion))
+
+        var champion = DataDragonProcessingHelper.Instance!.ChampionMapping[championDto.character_id];
+
+        var itemNames = ProcessingHelper.GetItemString(championDto.itemNames);
+
+        if (itemNames == null) // consider it a default case, remove all of the freaky stuff
         {
-            throw new Exception($"Failed to parse {cleanedChampionName}");
+            championDto.itemNames = [];
         }
 
         string weakHash = CalculateWeakChampionHash(championDto);
@@ -129,12 +124,8 @@ public class DataService
             List<string> championHashes = new List<string>();
             foreach (Unit unit in teamCompDtos.units)
             {
-                var cleanedChampionName = ProcessingHelper.CleanChampionName(unit.character_id);
-                if (cleanedChampionName == null)
-                {
-                    continue;
-                }
-                championHashes.Add(CalculateWeakChampionHash(unit));
+                if (ProcessingHelper.DoesChampionExist(unit.character_id))
+                    championHashes.Add(CalculateWeakChampionHash(unit));
             }
 
             var newTeamCompEntity = new TeamCompEntity
@@ -163,7 +154,7 @@ public class DataService
             currentMatchTeamCompHashes.Add(CalculateTeamCompHash(participant));
             foreach (Unit unit in participant.units)
             {
-                if (ProcessingHelper.CleanChampionName(unit.character_id) != null)
+                if (ProcessingHelper.DoesChampionExist(unit.character_id))
                     currentMatchChampionHashes.Add(CalculateChampionHash(unit));
             }
         }
@@ -244,8 +235,10 @@ public class DataService
     {
         return HashHelper.CalculateChampionHash(new()
         {
-            ChampionName = ProcessingHelper.CleanChampionName(champion.character_id) ?? throw new Exception("Cannot calculate champion hash of an invalid champion"),
-            Items = ProcessingHelper.GetItemString(champion.itemNames, ConfigurationHelper.SetNumber),
+            ChampionName = DataDragonProcessingHelper.Instance!.ChampionMapping.ContainsKey(champion.character_id) ?
+                    DataDragonProcessingHelper.Instance.ChampionMapping[champion.character_id].ToString() :
+                    throw new Exception("Cannot calculate champion hash of an invalid champion"),
+            Items = ProcessingHelper.GetItemString(champion.itemNames),
             Level = champion.tier
         });
     }
@@ -254,7 +247,9 @@ public class DataService
     {
         return HashHelper.CalculateWeakChampionHash(new()
         {
-            ChampionName = ProcessingHelper.CleanChampionName(champion.character_id) ?? throw new Exception("Cannot calculate champion hash of an invalid champion"),
+            ChampionName = DataDragonProcessingHelper.Instance!.ChampionMapping.ContainsKey(champion.character_id) ?
+                    DataDragonProcessingHelper.Instance.ChampionMapping[champion.character_id].ToString() :
+                    throw new Exception("Cannot calculate champion hash of an invalid champion"),
             Level = champion.tier
         });
     }
@@ -262,14 +257,14 @@ public class DataService
     private string CalculateTeamCompHash(Participant participantDtos)
     {
         var sortedChampions = participantDtos.units
-            .Where(t => ProcessingHelper.CleanChampionName(t.character_id) != null)
-            .OrderBy(t => ProcessingHelper.CleanChampionName(t.character_id))
-            .ThenBy(t => ProcessingHelper.GetItemString(t.itemNames, ConfigurationHelper.SetNumber))
+            .Where(t => DataDragonProcessingHelper.Instance!.ChampionMapping.ContainsKey(t.character_id))
+            .OrderBy(t => DataDragonProcessingHelper.Instance!.ChampionMapping[t.character_id])
+            .ThenBy(t => ProcessingHelper.GetItemString(t.itemNames))
             .ToList();
 
         var championHashRequests = sortedChampions.Select(x => new WeakChampionHashCreateModel
         {
-            ChampionName = ProcessingHelper.CleanChampionName(x.character_id)!,
+            ChampionName = DataDragonProcessingHelper.Instance!.ChampionMapping[x.character_id].ToString(),
             Level = x.tier
         }).ToList();
 

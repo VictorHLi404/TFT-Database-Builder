@@ -1,5 +1,6 @@
 using Builder.Common.Dtos.LambdaApi.Champion;
 using Builder.Common.Helpers;
+using Builder.Common.Enums;
 using Builder.LambdaApi.Services;
 using Microsoft.AspNetCore.Mvc;
 

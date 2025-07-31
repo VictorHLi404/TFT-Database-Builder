@@ -5,5 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
+  <ItemGroup>
+    <None Include="DataDragonFiles\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
